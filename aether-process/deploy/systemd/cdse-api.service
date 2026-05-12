@@ -1,0 +1,17 @@
+[Unit]
+Description=Aether API
+After=network.target
+
+[Service]
+Type=simple
+User=cdse
+WorkingDirectory=/opt/cdse-api
+Environment=CDSE_CONFIG_FILE=/opt/cdse-api/config.txt
+Environment=CDSE_HOST=0.0.0.0
+Environment=CDSE_PORT=8080
+ExecStart=/opt/cdse-api/scripts/run_api.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

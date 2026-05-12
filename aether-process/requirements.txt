@@ -1,0 +1,30 @@
+# =============================================================================
+# Aether API — Dependencias Python
+#
+# Entorno gestionado con Miniconda. Antes de instalar con pip, activa el
+# entorno Conda que ya incluye GDAL, PROJ y GEOS:
+#   conda activate /opt/cdse-api/conda_envs/process_server
+#
+# Instalar:
+#   pip install -r requirements.txt
+#
+# GDAL, PROJ y GEOS se instalan vía Conda (no pip) para garantizar la
+# vinculación con las librerías nativas del sistema:
+#   conda install -c conda-forge gdal proj geos
+# =============================================================================
+
+# --- API web ------------------------------------------------------------------
+fastapi==0.136.1
+uvicorn[standard]==0.46.0          # incluye websockets, httptools, uvloop
+
+# --- Validación de datos ------------------------------------------------------
+pydantic==2.13.3
+
+# --- Base de datos ------------------------------------------------------------
+psycopg2-binary==2.9.12            # driver PostgreSQL/PostGIS
+
+# --- Sentinel / CDSE ----------------------------------------------------------
+cdsetool==0.3.1                    # descarga y consulta de productos Copernicus
+
+# --- HTTP (cloud_service, feed_service) ---------------------------------------
+requests==2.33.1

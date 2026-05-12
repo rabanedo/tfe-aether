@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Aether pipeline periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+Unit=cdse-pipeline.service
+
+[Install]
+WantedBy=timers.target

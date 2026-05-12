@@ -1,0 +1,30 @@
+# =============================================================================
+# Aether API — Configuración de la plataforma
+#
+# Los valores marcados con ${VAR} se resuelven desde el entorno del proceso.
+# Define esas variables en el unit de systemd (EnvironmentFile=) o en el
+# entorno del usuario antes de arrancar el servicio, NUNCA en este fichero.
+#
+# Variables de entorno requeridas:
+#   CDSE_CATALOG_USER   — usuario de PostgreSQL
+#   CDSE_CATALOG_PASS   — contraseña de PostgreSQL
+#   CDSE_GEOSERVER_USER — usuario de GeoServer REST API
+#   CDSE_GEOSERVER_PASS — contraseña de GeoServer REST API
+# =============================================================================
+
+# --- Base de datos (PostgreSQL / PostGIS) ------------------------------------
+catalog_db=postgres
+catalog_host=127.0.0.1
+catalog_port=5432
+catalog_user=${CDSE_CATALOG_USER}
+catalog_pass=${CDSE_CATALOG_PASS}
+
+# --- GeoServer REST API -------------------------------------------------------
+# Para stores de tipo GeoTIFF individual:
+geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.geotiff
+# Para stores de tipo ImageMosaic (descomentar y comentar la línea anterior):
+#geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.imagemosaic
+
+geoserver_products_path=file:///almacen/data
+geoserver_user=${CDSE_GEOSERVER_USER}
+geoserver_pass=${CDSE_GEOSERVER_PASS}
