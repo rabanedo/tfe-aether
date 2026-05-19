@@ -89,6 +89,60 @@ def _ensure_dir(path: str) -> None:
 # Procesadores de bandas
 # ---------------------------------------------------------------------------
 
+def _to_cog(
+    src: str,
+    dst: str,
+    compress: str = "LZW",
+    predictor: int = 2,
+    blocksize: int = 512,
+    nodata: str | None = None,
+    srs: str = "EPSG:25830",
+) -> None:
+    """
+    Reproyecta src a srs y escribe dst como Cloud Optimized GeoTIFF.
+
+    El driver COG de GDAL (>= 3.1) genera en un único paso:
+      - Tiles internos de blocksize x blocksize píxeles
+      - Overviews internos con remuestreo AVERAGE
+      - Cabecera con IFDs al inicio del fichero (requisito COG)
+
+    Compresiones recomendadas por tipo de dato:
+      - RGB Byte visual  → JPEG   (lossy, ~5x más pequeño, válido para WMS)
+      - NDVIb Byte       → LZW  + PREDICTOR=2 (lossless, preserva nodata exacto)
+      - NDVI Float32     → DEFLATE + PREDICTOR=3 (lossless float, mejor que LZW)
+
+    Args:
+        src:       Fichero fuente (cualquier formato GDAL).
+        dst:       Fichero COG de salida (.tif).
+        compress:  Algoritmo de compresión (LZW, DEFLATE, JPEG).
+        predictor: Predictor de compresión (2=int, 3=float; ignorado por JPEG).
+        blocksize: Tamaño de tile interno en píxeles.
+        nodata:    Valor nodata como string, o None para no establecer.
+        srs:       SRS destino para gdalwarp.
+    """
+    warped = dst + "_warp_tmp.tif"
+    try:
+        nodata_opt = f"-dstnodata {nodata}" if nodata is not None else ""
+        _run_cmd(
+            f"gdalwarp -t_srs {srs} {nodata_opt} -overwrite {src} {warped}"
+        )
+        predictor_opt = (
+            f"-co PREDICTOR={predictor}"
+            if compress.upper() not in ("JPEG",)
+            else ""
+        )
+        _run_cmd(
+            f"gdal_translate -of COG "
+            f"-co COMPRESS={compress} {predictor_opt} "
+            f"-co BLOCKSIZE={blocksize} "
+            f"-co OVERVIEW_RESAMPLING=AVERAGE "
+            f"-co BIGTIFF=IF_SAFER "
+            f"{warped} {dst}"
+        )
+    finally:
+        _remove_files(warped)
+
+
 def compute_rgb432(xml_path: str, out_path: str,
                    coef_r: float = 0.05, coef_g: float = 0.05, coef_b: float = 0.05) -> None:
     vrt = out_path + "_VRT.vrt"
@@ -111,8 +165,7 @@ def compute_rgb432(xml_path: str, out_path: str,
              f"--calc=\'{calc.format(c=coef_b)}\' --type=Byte --NoDataValue=0 --overwrite")
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b4_tif} {b3_tif} {b2_tif}")
-    _run_cmd(f"gdalwarp -dstnodata 0 -t_srs EPSG:25830 -co COMPRESS=LZW -overwrite {tmp} {out_path}")
-    _run_cmd(f"gdaladdo {out_path} 2 4 8 16 32 64 128 256")
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0")
 
     _remove_files(
         out_path + "_VRT_1.vrt", out_path + "_VRT_2.vrt",
@@ -145,8 +198,7 @@ def compute_rgb1184(xml_path: str, out_path: str,
              f"--calc=\'{calc.format(c=coef_b)}\' --type=Byte --NoDataValue=0 --overwrite")
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b11_tif} {b8_tif} {b4_tif}")
-    _run_cmd(f"gdalwarp -dstnodata 0 -t_srs EPSG:25830 -co COMPRESS=LZW -overwrite {tmp} {out_path}")
-    _run_cmd(f"gdaladdo {out_path} 2 4 8 16 32 64 128 256")
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0")
 
     _remove_files(
         out_path + "_VRT_1.vrt", out_path + "_VRT_2.vrt",
@@ -179,8 +231,7 @@ def compute_rgb1283(xml_path: str, out_path: str,
              f"--calc=\'{calc.format(c=coef_b)}\' --type=Byte --NoDataValue=0 --overwrite")
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b12_tif} {b8_tif} {b3_tif}")
-    _run_cmd(f"gdalwarp -dstnodata 0 -t_srs EPSG:25830 -co COMPRESS=LZW -overwrite {tmp} {out_path}")
-    _run_cmd(f"gdaladdo {out_path} 2 4 8 16 32 64 128 256")
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0")
 
     _remove_files(
         out_path + "_VRT_1.vrt", out_path + "_VRT_2.vrt",
@@ -207,8 +258,7 @@ def compute_ndvi(xml_path: str, out_path: str) -> None:
         f"gdal_calc.py -A {b8_vrt} -B {b4_vrt} --outfile={tmp} "
         f"--calc=\'{calc}\' --type=Float32 --NoDataValue=9999 --overwrite"
     )
-    _run_cmd(f"gdalwarp -dstnodata 9999 -t_srs EPSG:25830 -co COMPRESS=LZW {tmp} {out_path}")
-    _run_cmd(f"gdaladdo {out_path} 2 4 8 16 32 64 128 256")
+    _to_cog(tmp, out_path, compress="DEFLATE", predictor=3, nodata="9999")
 
     _remove_files(
         out_path + "_VRT_1.vrt", out_path + "_VRT_2.vrt",
@@ -236,8 +286,7 @@ def compute_ndvi_byte(xml_path: str, out_path: str) -> None:
         f"gdal_calc.py -A {b8_vrt} -B {b4_vrt} --outfile={tmp} "
         f"--calc=\'{calc}\' --type=Byte --NoDataValue=255 --overwrite"
     )
-    _run_cmd(f"gdalwarp -dstnodata 255 -t_srs EPSG:25830 -co COMPRESS=LZW -overwrite {tmp} {out_path}")
-    _run_cmd(f"gdaladdo {out_path} 2 4 8 16 32 64 128 256")
+    _to_cog(tmp, out_path, compress="LZW", predictor=2, nodata="255")
 
     _remove_files(
         out_path + "_VRT_1.vrt", out_path + "_VRT_2.vrt",
