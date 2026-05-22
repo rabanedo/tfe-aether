@@ -21,10 +21,10 @@ catalog_pass=${CDSE_CATALOG_PASS}
 
 # --- GeoServer REST API -------------------------------------------------------
 # Para stores de tipo GeoTIFF individual:
-geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.geotiff
+#geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.geotiff
 # Para stores de tipo ImageMosaic (descomentar y comentar la línea anterior):
-#geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.imagemosaic
+geoserver_rest_url=http://geoserver-host:8080/geoserver/rest/workspaces/aether/coveragestores/*coverage_name*/external.imagemosaic
 
-geoserver_products_path=file:///almacen/data
+geoserver_products_path=file:///dwh/data
 geoserver_user=${CDSE_GEOSERVER_USER}
 geoserver_pass=${CDSE_GEOSERVER_PASS}

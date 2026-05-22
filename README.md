@@ -72,7 +72,7 @@ La plataforma se articula en **dos nodos desacoplados**, gestionados como Infrae
 | 1 | **FeedService** | Consulta la API CDSE y registra nuevos productos Sentinel-2 disponibles según la geometría, tipo de producto y rango temporal de cada workspace. |
 | 2 | **CloudCoverageService** | Recupera el porcentaje de cobertura nubosa de cada producto vía OData de CDSE. Permite filtrar descargas por umbral de nubosidad. |
 | 3 | **DownloadService** | Descarga los productos `.SAFE.zip` respetando el umbral de nubosidad configurado. Actualiza el catálogo e inicia la cola de procesamiento. |
-| 4 | **ProcessService** | Ejecuta comandos de procesamiento configurable por workspace (generación de NDVI, RGB u otros índices) sobre los productos descargados. |
+| 4 | **ProcessService** | Ejecuta el comando de procesamiento configurado por workspace (`s2_process_command`). Por defecto invoca **`rgb_ndvi.py`**, que descomprime el `.SAFE.zip`, extrae las bandas necesarias y genera los productos derivados configurados (`RGB1184`, `NDVIb`, etc.) como Cloud Optimized GeoTIFF (COG) reproyectados a EPSG:25830. Los productos generados se ingresan en el catálogo y pasan a la cola de mosaicos. |
 | 5 | **MosaicService** | Compone mosaicos multitile mediante GDAL (`BuildVRT` + `Translate`) cuando todos los tiles de un orbit/fecha están procesados. |
 
 ### API REST (FastAPI)
@@ -100,6 +100,19 @@ Todos los endpoints aceptan un payload JSON con parámetros opcionales:
   "dry_run": false
 }
 ```
+
+### Productos derivados generados por `rgb_ndvi.py`
+
+| Código | Descripción | Bandas S2 | Tipo | Compresión COG |
+|---|---|---|---|---|
+| `RGB432` | Composición color verdadero | B4, B3, B2 (10 m) | Byte | JPEG |
+| `RGB1184` | Composición falso color (vegetación) | B11, B8, B4 | Byte | JPEG |
+| `RGB1283` | Composición falso color (urbano) | B12, B8, B3 | Byte | JPEG |
+| `NDVI` | Índice de vegetación Float32 (−1 a +1) | B8, B4 | Float32 | DEFLATE PREDICTOR=3 |
+| `NDVIb` | NDVI escalado a Byte (0–100, NoData=255) | B8, B4 | Byte | LZW PREDICTOR=2 |
+
+El producto activo por defecto es `RGB1184 NDVIb`. La lista se configura mediante 
+el parámetro `s2_process_params` del workspace en la base de datos.
 
 ### Publicación OGC
 
@@ -177,7 +190,7 @@ catalog_user=${CDSE_CATALOG_USER}
 catalog_pass=${CDSE_CATALOG_PASS}
 
 geoserver_rest_url=http://<geoserver-host>:8080/geoserver/rest/...
-geoserver_products_path=file:///almacen/data
+geoserver_products_path=file:///<ruta_productos>
 geoserver_user=${CDSE_GEOSERVER_USER}
 geoserver_pass=${CDSE_GEOSERVER_PASS}
 ```
