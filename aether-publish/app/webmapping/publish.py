@@ -43,7 +43,7 @@ logger = logging.getLogger("aether.publish")
 # ---------------------------------------------------------------------------
 _DEFAULT_REST_URL = (
     "http://localhost:8080/geoserver/rest/workspaces/aether"
-    "/coveragestores/*coverage_name*/external.geotiff"
+    "/coveragestores/*coverage_name*/external.imagemosaic"
 )
 _DEFAULT_PRODUCTS = [
     "s2rgb",

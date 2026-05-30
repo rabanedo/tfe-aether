@@ -133,6 +133,7 @@ def _to_cog(
         )
         _run_cmd(
             f"gdal_translate -of COG "
+            f"-a_srs {srs} "
             f"-co COMPRESS={compress} {predictor_opt} "
             f"-co BLOCKSIZE={blocksize} "
             f"-co OVERVIEW_RESAMPLING=AVERAGE "
