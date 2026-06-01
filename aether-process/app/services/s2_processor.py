@@ -113,14 +113,36 @@ def create_mosaic(catalog, task: dict) -> None:
         vrt_path = str(output_base.with_suffix(".vrt"))
         tif_path = str(output_base.with_suffix(".tif"))
 
-        gdal.BuildVRT(vrt_path, derived_paths)
-        ds = gdal.Open(vrt_path)
-        if ds is None:
-            raise RuntimeError(f"Cannot open VRT: {vrt_path}")
-        ds = gdal.Translate(tif_path, ds, creationOptions=["COMPRESS=DEFLATE"])
-        if ds is None:
-            raise RuntimeError(f"Cannot translate to GeoTIFF: {tif_path}")
-        ds = None
+        # GDAL 3.x escribe WKT2 por defecto. GeoTools/GeoServer solo procesa WKT1.
+        # Se fuerza WKT1 y se referencia el EPSG explícitamente para que GeoServer
+        # pueda indexar el granulo sin error de CRS user-defined.
+        gdal.SetConfigOption("GDAL_WKT_FORMAT", "WKT1_GDAL")
+        try:
+            gdal.BuildVRT(vrt_path, derived_paths)
+            ds = gdal.Open(vrt_path)
+            if ds is None:
+                raise RuntimeError(f"Cannot open VRT: {vrt_path}")
+
+            ds = gdal.Translate(
+                tif_path,
+                ds,
+                format="COG",
+                outputSRS="EPSG:25830",
+                creationOptions=[
+                    "COMPRESS=DEFLATE",
+                    "BLOCKSIZE=512",
+                    "OVERVIEW_RESAMPLING=AVERAGE",
+                    "BIGTIFF=IF_SAFER",
+                ],
+            )
+            if ds is None:
+                raise RuntimeError(f"Cannot translate to COG: {tif_path}")
+            ds = None
+
+        finally:
+            gdal.SetConfigOption("GDAL_WKT_FORMAT", None)
+            if os.path.exists(vrt_path):
+                os.remove(vrt_path)
 
         catalog.ingest_derived_product(
             url=tif_path,
@@ -129,9 +151,6 @@ def create_mosaic(catalog, task: dict) -> None:
             ingestion_date=date.today(),
             workspace_id=workspace_id,
         )
-
-        if os.path.exists(vrt_path):
-            os.remove(vrt_path)
 
 
 def is_mosaic_ready(catalog, task: dict) -> bool:

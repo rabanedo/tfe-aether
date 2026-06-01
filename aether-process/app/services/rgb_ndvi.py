@@ -106,7 +106,7 @@ def _to_cog(
       - Overviews internos con remuestreo AVERAGE
       - Cabecera con IFDs al inicio del fichero (requisito COG)
 
-    Compresiones recomendadas por tipo de dato:
+    Compresiones por tipo de dato:
       - RGB Byte visual  → JPEG   (lossy, ~5x más pequeño, válido para WMS)
       - NDVIb Byte       → LZW  + PREDICTOR=2 (lossless, preserva nodata exacto)
       - NDVI Float32     → DEFLATE + PREDICTOR=3 (lossless float, mejor que LZW)
@@ -133,6 +133,7 @@ def _to_cog(
         )
         _run_cmd(
             f"gdal_translate -of COG "
+            f"--config GDAL_WKT_FORMAT WKT1_GDAL "
             f"-a_srs {srs} "
             f"-co COMPRESS={compress} {predictor_opt} "
             f"-co BLOCKSIZE={blocksize} "
