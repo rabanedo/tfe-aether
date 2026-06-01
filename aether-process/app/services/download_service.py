@@ -35,7 +35,7 @@ class DownloadService:
                 # ── Filtro de cobertura nubosa ────────────────────────────
                 # Si cloud_coverage es NULL dejamos pasar (CloudCoverageService aún
                 # no ha rellenado el dato). Si supera el umbral del workspace,
-                # dejamos la tarea en 'waiting' y la saltamos en esta ejecución.
+                # modificamos la tarea de 'waiting' a 'skipped' para saltar su ejecución.
                 cloud = task.get("cloud_coverage")
                 max_cloud = task.get("s2_max_cloud_cover")
 
@@ -46,7 +46,9 @@ class DownloadService:
                             task["uuid"], float(cloud), float(max_cloud),
                         )
                         skipped_cloud += 1
-                        continue  # no se toca el estado en BD
+                        if not dry_run:
+                            catalog.update_download_status(task["uuid"], "skipped")
+                        continue
 
                 if dry_run:
                     processed += 1

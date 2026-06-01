@@ -39,6 +39,15 @@ def run_downloads(payload: RunRequest):
     return JobResponse(ok=True, action="downloads.run", requested=payload.model_dump(), result=result)
 
 
+@app.post("/api/v1/downloads/reset-skipped", response_model=JobResponse)
+def reset_skipped(payload: RunRequest):
+    with catalog_session() as catalog:
+        count = catalog.reset_skipped_downloads(
+            workspace_id=payload.workspace_id,
+        )
+    return JobResponse(ok=True, action="downloads.reset_skipped", requested=payload.model_dump(), result={"reset": count})
+
+
 @app.post("/api/v1/processing/run", response_model=JobResponse)
 def run_processing(payload: RunRequest):
     result = ProcessService().run(payload.limit, payload.dry_run)

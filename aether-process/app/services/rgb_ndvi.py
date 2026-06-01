@@ -189,7 +189,7 @@ def compute_rgb1184(xml_path: str, out_path: str,
     _run_cmd(f"gdal_translate -of VRT -b 5 {ds2} {b11_20_vrt}")
     _run_cmd(f"gdal_translate -of VRT -b 4 {ds1} {b8_vrt}")
     _run_cmd(f"gdal_translate -of VRT -b 1 {ds1} {b4_vrt}")
-    _run_cmd(f"gdalwarp -tr 10 10 -of VRT {b11_20_vrt} {b11_vrt}")
+    _run_cmd(f"gdalwarp -overwrite -tr 10 10 -of VRT {b11_20_vrt} {b11_vrt}")
 
     calc = "(A.astype(float)*B*C!=0)*(A*{c}*(A*{c}<=255)+(A*{c}>255)*255)"
     _run_cmd(f"gdal_calc.py -A {b11_vrt} -B {b8_vrt} -C {b4_vrt} --outfile={b11_tif} "

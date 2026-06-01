@@ -765,6 +765,43 @@ class CatalogManager:
         with self._conn() as conn, self._cur(conn) as cur:
             cur.execute(sql, (cloud_coverage, uuid))
 
+    def reset_skipped_downloads(
+            self,
+            workspace_id: int | None = None,
+            max_cloud: float | None = None,
+    ) -> int:
+        """
+        Devuelve a 'waiting' las tareas skipped para que sean reevaluadas.
+
+        Útil cuando se modifica s2_max_cloud_cover en el workspace.
+        Opcionalmente filtra solo las que ahora cumplirían el nuevo umbral.
+
+        Returns:
+            Número de tareas reseteadas.
+        """
+        with self._conn() as conn:
+            cur = conn.cursor()
+            conditions = ["dq.status = 'skipped'"]
+            params: list = []
+
+            if workspace_id is not None:
+                conditions.append("dq.workspace_id = %s")
+                params.append(workspace_id)
+
+            if max_cloud is not None:
+                conditions.append("dq.cloud_coverage <= %s")
+                params.append(max_cloud)
+
+            where = " AND ".join(conditions)
+            cur.execute(
+                f"UPDATE catalog.download_queue SET status = 'waiting' "
+                f"WHERE {where}",
+                params,
+            )
+            count = cur.rowcount
+            conn.commit()
+        return count
+
     def close(self):
         """Método para evitar errores en la limpieza de la sesión"""
         pass
