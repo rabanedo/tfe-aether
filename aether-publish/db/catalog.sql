@@ -97,7 +97,20 @@ CREATE INDEX idx_s2ndvi_mosaic_ingestion ON public.s2ndvi_mosaic (ingestion);
 CREATE INDEX idx_s2rgb_mosaic_ingestion ON public.s2rgb_mosaic (ingestion);
 
 -- =============================================================================
--- PERMISOS (para que aether_user tenga acceso a estas tablas y secuencias)
+-- PROPIEDAD DE LAS TABLAS Y SECUENCIAS
+-- =============================================================================
+
+-- Dar acceso al esquema
 GRANT USAGE ON SCHEMA public TO aether_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.s2ndvi, public.s2rgb, public.s2ndvi_mosaic, public.s2rgb_mosaic TO aether_user;
-GRANT USAGE, SELECT ON SEQUENCE public.s2ndvi_fid_seq, public.s2rgb_fid_seq, public.s2ndvi_mosaic_fid_seq, public.s2rgb_mosaic_fid_seq TO aether_user;
+
+-- Traspasar propiedad de las tablas a aether_user
+ALTER TABLE public.s2ndvi OWNER TO aether_user;
+ALTER TABLE public.s2rgb OWNER TO aether_user;
+ALTER TABLE public.s2ndvi_mosaic OWNER TO aether_user;
+ALTER TABLE public.s2rgb_mosaic OWNER TO aether_user;
+
+-- Traspasar propiedad de las secuencias a aether_user
+ALTER SEQUENCE public.s2ndvi_fid_seq OWNER TO aether_user;
+ALTER SEQUENCE public.s2rgb_fid_seq OWNER TO aether_user;
+ALTER SEQUENCE public.s2ndvi_mosaic_fid_seq OWNER TO aether_user;
+ALTER SEQUENCE public.s2rgb_mosaic_fid_seq OWNER TO aether_user;
