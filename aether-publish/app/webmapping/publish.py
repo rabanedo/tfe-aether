@@ -5,7 +5,10 @@ publish.py — Publicación de productos GeoTIFF en GeoServer (Nodo 2 Aether).
 
 Recorre los directorios de productos generados por el pipeline de procesamiento
 y notifica a GeoServer vía REST API para que registre cada fichero .tif como
-una nueva cobertura en el coveragestore correspondiente.
+un nuevo granulo en el coveragestore ImageMosaic correspondiente.
+
+Solo publica granulos que no estén ya indexados en GeoServer, lo que hace
+el script idempotente: puede ejecutarse varias veces sin crear duplicados.
 
 Uso:
     python publish.py -p /dwh/data
@@ -14,8 +17,9 @@ Uso:
 Variables de entorno requeridas (definidas en .env o en el entorno del sistema):
     CDSE_GEOSERVER_USER      Usuario de la REST API de GeoServer
     CDSE_GEOSERVER_PASS      Contraseña de la REST API de GeoServer
-    CDSE_GEOSERVER_REST_URL  URL base del endpoint REST de GeoServer
-                             (puede contener el placeholder *coverage_name*)
+    CDSE_GEOSERVER_REST_URL  Endpoint REST para harvesting de granulos.
+                             Usa *coverage_name* como placeholder (aparece 2 veces).
+                             Formato: .../coveragestores/*coverage_name*/external.imagemosaic
 """
 from __future__ import annotations
 
@@ -70,7 +74,7 @@ def _load_dotenv(env_file: str | None) -> None:
             key, value = line.split("=", 1)
             key = key.strip()
             value = value.strip().strip('"').strip("'")
-            if key not in os.environ:            # el entorno tiene prioridad
+            if key not in os.environ:
                 os.environ[key] = value
 
 
@@ -87,6 +91,61 @@ def _required_env(name: str) -> str:
     return value
 
 
+def _granules_url(rest_url_template: str, coverage_name: str) -> str:
+    """
+    Construye la URL del endpoint de granulos a partir de la URL de harvest.
+
+    De:  .../coveragestores/s2ndvi/external.imagemosaic
+    A:   .../coveragestores/s2ndvi/coverages/s2ndvi/index/granules.json
+    """
+    base = rest_url_template.replace("*coverage_name*", coverage_name)
+    base = base.replace("/external.imagemosaic", "")
+    return f"{base}/coverages/{coverage_name}/index/granules.json"
+
+
+def _is_already_indexed(
+    file_path: Path,
+    coverage_name: str,
+    rest_url_template: str,
+    user: str,
+    password: str,
+) -> bool:
+    """
+    Consulta GeoServer si el granulo ya está registrado en el índice del mosaico.
+
+    Usa el campo 'location' de la tabla de granulos en PostgreSQL, que GeoServer
+    expone vía REST. Permite que el script sea idempotente: relanzarlo no
+    crea entradas duplicadas en el índice.
+
+    Returns:
+        True si el granulo ya está indexado. False si no lo está o hay error
+        en la consulta (se asume no indexado para intentar publicarlo).
+    """
+    url = _granules_url(rest_url_template, coverage_name)
+    location = file_path.name
+    try:
+        resp = requests.get(
+            url,
+            auth=(user, password),
+            params={"filter": f"location = '{location}'"},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            features = resp.json().get("features") or []
+            return len(features) > 0
+        # 404 = coveragestore o coverage no inicializada todavía → no indexado
+        if resp.status_code == 404:
+            return False
+        logger.debug(
+            "Comprobación de granulo devolvió HTTP %s para %s",
+            resp.status_code, file_path.name,
+        )
+    except RequestException as exc:
+        logger.debug("No se pudo comprobar si %s está indexado: %s", file_path.name, exc)
+    # En caso de duda intentamos publicar
+    return False
+
+
 def _publish_file(
     file_path: Path,
     coverage_name: str,
@@ -96,16 +155,17 @@ def _publish_file(
     dry_run: bool,
 ) -> bool:
     """
-    Notifica a GeoServer que registre file_path como nueva cobertura.
+    Añade file_path como nuevo granulo a un coveragestore ImageMosaic existente.
 
-    GeoServer espera una URL tipo 'file:///ruta/al/fichero.tif' en el cuerpo
-    de la petición POST, con Content-Type: text/plain.
+    Endpoint: POST .../coveragestores/{cs}/external.imagemosaic
+    GeoServer 2.28.x acepta la ruta absoluta sin prefijo file:// en el cuerpo
+    (text/plain). Responde 202 Accepted si el granulo se registra correctamente.
 
     Returns:
         True si la publicación fue exitosa (o dry_run), False en caso de error.
     """
     url = rest_url_template.replace("*coverage_name*", coverage_name)
-#    body = f"file://{file_path.absolute()}"  # absolute() respeta symlinks; resolve() los rompería
+    # absolute() respeta bind mounts y symlinks; resolve() los rompería
     body = str(file_path.absolute())
 
     if dry_run:
@@ -170,7 +230,7 @@ def main() -> int:
         "--env-file",
         default=None,
         metavar="FILE",
-        help="Ruta al fichero .env con las credenciales (por defecto /opt/aether-publish/.env).",
+        help="Ruta al fichero .env (por defecto /opt/aether-publish/.env).",
     )
     parser.add_argument(
         "--dry-run",
@@ -188,22 +248,21 @@ def main() -> int:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # -- Cargar .env antes de leer credenciales --------------------------------
     _load_dotenv(args.env_file)
 
-    user         = _required_env("CDSE_GEOSERVER_USER")
-    password     = _required_env("CDSE_GEOSERVER_PASS")
-    rest_url     = os.environ.get("CDSE_GEOSERVER_REST_URL", _DEFAULT_REST_URL)
+    user          = _required_env("CDSE_GEOSERVER_USER")
+    password      = _required_env("CDSE_GEOSERVER_PASS")
+    rest_url      = os.environ.get("CDSE_GEOSERVER_REST_URL", _DEFAULT_REST_URL)
     products_root = Path(args.products_path)
 
     if not products_root.is_dir():
         logger.error("El directorio de productos no existe: %s", products_root)
         return 1
 
-    # -- Iterar productos y ficheros ------------------------------------------
-    total_ok    = 0
-    total_fail  = 0
-    total_skip  = 0
+    total_ok      = 0
+    total_fail    = 0
+    total_skip    = 0
+    total_already = 0
 
     for product in args.products:
         product_dir = products_root / product
@@ -223,6 +282,12 @@ def main() -> int:
         logger.info("── Publicando producto '%s' (%d ficheros) ──", product, len(tif_files))
 
         for tif in tif_files:
+            # Idempotencia: no re-publicar granulos ya indexados en GeoServer
+            if not args.dry_run and _is_already_indexed(tif, product, rest_url, user, password):
+                logger.debug("Ya indexado, omitido: %s", tif.name)
+                total_already += 1
+                continue
+
             ok = _publish_file(
                 file_path=tif,
                 coverage_name=product,
@@ -236,13 +301,17 @@ def main() -> int:
             else:
                 total_fail += 1
 
-    # -- Resumen --------------------------------------------------------------
     logger.info(
-        "Publicación finalizada: ok=%d  errores=%d  omitidos=%d  dry_run=%s",
-        total_ok, total_fail, total_skip, args.dry_run,
+        "Publicación finalizada: ok=%d  ya_indexados=%d  errores=%d  omitidos=%d  dry_run=%s",
+        total_ok, total_already, total_fail, total_skip, args.dry_run,
     )
 
-    return 0 if total_fail == 0 else 1
+    # Fallo de configuración (sin productos ni directorios) → código 1
+    # Fallos individuales de granulos → se loguean pero el servicio no falla
+    # para que systemd no marque el timer como fallido por errores transitorios
+    if total_ok == 0 and total_already == 0 and total_fail > 0:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
