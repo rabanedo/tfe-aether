@@ -13,7 +13,7 @@ from app.services.feed_service import FeedService
 from app.services.mosaic_service import MosaicService
 from app.services.pipeline_service import PipelineService
 from app.services.process_service import ProcessService
-from app.db.database import catalog_session
+from app.services.catalog_provider import catalog_session
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Security, HTTPException

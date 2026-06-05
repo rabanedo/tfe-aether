@@ -237,32 +237,32 @@ CREATE TABLE "catalog"."workspaces" (
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."derived_products_id_seq"', 1, true);
+SELECT setval('"catalog"."derived_products_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."download_queue_id_seq"', 1, true);
+SELECT setval('"catalog"."download_queue_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."mosaic_queue_id_seq"', 1, true);
+SELECT setval('"catalog"."mosaic_queue_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."original_products_id_seq"', 1, true);
+SELECT setval('"catalog"."original_products_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."process_queue_id_seq"', 1, true);
+SELECT setval('"catalog"."process_queue_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."system_settings_id_seq"', 1, true);
+SELECT setval('"catalog"."system_settings_id_seq"', 1, false);
 
 -- ----------------------------
 -- Alter sequences owned by
