@@ -1,5 +1,6 @@
 -- =============================================================================
--- CONFIGURACIÓN DE SESIÓN (opcional, puede ayudar)
+-- CONFIGURACIÓN DE SESIÓN
+-- =============================================================================
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -10,91 +11,107 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+
 -- =============================================================================
--- EXTENSIONES (ya la tienes, pero por si acaso)
+-- EXTENSIONES
+-- =============================================================================
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
 
+
 -- =============================================================================
 -- TABLAS
+-- =============================================================================
 SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 -- Tabla s2ndvi
-CREATE TABLE public.s2ndvi (
+CREATE TABLE IF NOT EXISTS public.s2ndvi (
     fid       integer                          NOT NULL,
     the_geom  public.geometry(Polygon, 25830),
     location  character varying(255),
-    ingestion timestamp without time zone,
-    elevation integer
+    ingestion timestamp without time zone
 );
 ALTER TABLE public.s2ndvi OWNER TO postgres;
-CREATE SEQUENCE public.s2ndvi_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+CREATE SEQUENCE IF NOT EXISTS public.s2ndvi_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE public.s2ndvi_fid_seq OWNER TO postgres;
 ALTER SEQUENCE public.s2ndvi_fid_seq OWNED BY public.s2ndvi.fid;
 ALTER TABLE ONLY public.s2ndvi ALTER COLUMN fid SET DEFAULT nextval('public.s2ndvi_fid_seq'::regclass);
 
+
 -- Tabla s2rgb
-CREATE TABLE public.s2rgb (
+CREATE TABLE IF NOT EXISTS public.s2rgb (
     fid       integer                          NOT NULL,
     the_geom  public.geometry(Polygon, 25830),
     location  character varying(255),
-    ingestion timestamp without time zone,
-    elevation integer
+    ingestion timestamp without time zone
 );
 ALTER TABLE public.s2rgb OWNER TO postgres;
-CREATE SEQUENCE public.s2rgb_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+CREATE SEQUENCE IF NOT EXISTS public.s2rgb_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE public.s2rgb_fid_seq OWNER TO postgres;
 ALTER SEQUENCE public.s2rgb_fid_seq OWNED BY public.s2rgb.fid;
 ALTER TABLE ONLY public.s2rgb ALTER COLUMN fid SET DEFAULT nextval('public.s2rgb_fid_seq'::regclass);
 
 -- Tabla s2ndvi_mosaic
-CREATE TABLE public.s2ndvi_mosaic (
+CREATE TABLE IF NOT EXISTS public.s2ndvi_mosaic (
     fid       integer                          NOT NULL,
     the_geom  public.geometry(Polygon, 25830),
     location  character varying(255),
-    ingestion timestamp without time zone,
-    elevation integer
+    ingestion timestamp without time zone
 );
 ALTER TABLE public.s2ndvi_mosaic OWNER TO postgres;
-CREATE SEQUENCE public.s2ndvi_mosaic_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+CREATE SEQUENCE IF NOT EXISTS public.s2ndvi_mosaic_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE public.s2ndvi_mosaic_fid_seq OWNER TO postgres;
 ALTER SEQUENCE public.s2ndvi_mosaic_fid_seq OWNED BY public.s2ndvi_mosaic.fid;
 ALTER TABLE ONLY public.s2ndvi_mosaic ALTER COLUMN fid SET DEFAULT nextval('public.s2ndvi_mosaic_fid_seq'::regclass);
 
 -- Tabla s2rgb_mosaic
-CREATE TABLE public.s2rgb_mosaic (
+CREATE TABLE IF NOT EXISTS public.s2rgb_mosaic (
     fid       integer                          NOT NULL,
     the_geom  public.geometry(Polygon, 25830),
     location  character varying(255),
-    ingestion timestamp without time zone,
-    elevation integer
+    ingestion timestamp without time zone
 );
 ALTER TABLE public.s2rgb_mosaic OWNER TO postgres;
-CREATE SEQUENCE public.s2rgb_mosaic_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+CREATE SEQUENCE IF NOT EXISTS public.s2rgb_mosaic_fid_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE public.s2rgb_mosaic_fid_seq OWNER TO postgres;
 ALTER SEQUENCE public.s2rgb_mosaic_fid_seq OWNED BY public.s2rgb_mosaic.fid;
 ALTER TABLE ONLY public.s2rgb_mosaic ALTER COLUMN fid SET DEFAULT nextval('public.s2rgb_mosaic_fid_seq'::regclass);
 
+
 -- =============================================================================
 -- CLAVES PRIMARIAS
-ALTER TABLE ONLY public.s2ndvi ADD CONSTRAINT s2ndvi_pkey PRIMARY KEY (fid);
-ALTER TABLE ONLY public.s2rgb ADD CONSTRAINT s2rgb_pkey PRIMARY KEY (fid);
-ALTER TABLE ONLY public.s2ndvi_mosaic ADD CONSTRAINT s2ndvi_mosaic_pkey PRIMARY KEY (fid);
-ALTER TABLE ONLY public.s2rgb_mosaic ADD CONSTRAINT s2rgb_mosaic_pkey PRIMARY KEY (fid);
+-- =============================================================================
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 's2ndvi_pkey') THEN
+        ALTER TABLE ONLY public.s2ndvi ADD CONSTRAINT s2ndvi_pkey PRIMARY KEY (fid);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 's2rgb_pkey') THEN
+        ALTER TABLE ONLY public.s2rgb ADD CONSTRAINT s2rgb_pkey PRIMARY KEY (fid);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 's2ndvi_mosaic_pkey') THEN
+        ALTER TABLE ONLY public.s2ndvi_mosaic ADD CONSTRAINT s2ndvi_mosaic_pkey PRIMARY KEY (fid);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 's2rgb_mosaic_pkey') THEN
+        ALTER TABLE ONLY public.s2rgb_mosaic ADD CONSTRAINT s2rgb_mosaic_pkey PRIMARY KEY (fid);
+    END IF;
+END $$;
+
 
 -- =============================================================================
 -- ÍNDICES ESPACIALES
-CREATE INDEX spatial_s2ndvi_the_geom ON public.s2ndvi USING gist (the_geom);
-CREATE INDEX spatial_s2rgb_the_geom ON public.s2rgb USING gist (the_geom);
-CREATE INDEX spatial_s2ndvi_mosaic_the_geom ON public.s2ndvi_mosaic USING gist (the_geom);
-CREATE INDEX spatial_s2rgb_mosaic_the_geom ON public.s2rgb_mosaic USING gist (the_geom);
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS spatial_s2ndvi_the_geom ON public.s2ndvi USING gist (the_geom);
+CREATE INDEX IF NOT EXISTS spatial_s2rgb_the_geom ON public.s2rgb USING gist (the_geom);
+CREATE INDEX IF NOT EXISTS spatial_s2ndvi_mosaic_the_geom ON public.s2ndvi_mosaic USING gist (the_geom);
+CREATE INDEX IF NOT EXISTS spatial_s2rgb_mosaic_the_geom ON public.s2rgb_mosaic USING gist (the_geom);
 
 -- Índices por fecha de ingesta
-CREATE INDEX idx_s2ndvi_ingestion ON public.s2ndvi (ingestion);
-CREATE INDEX idx_s2rgb_ingestion ON public.s2rgb (ingestion);
-CREATE INDEX idx_s2ndvi_mosaic_ingestion ON public.s2ndvi_mosaic (ingestion);
-CREATE INDEX idx_s2rgb_mosaic_ingestion ON public.s2rgb_mosaic (ingestion);
+CREATE INDEX IF NOT EXISTS idx_s2ndvi_ingestion ON public.s2ndvi (ingestion);
+CREATE INDEX IF NOT EXISTS idx_s2rgb_ingestion ON public.s2rgb (ingestion);
+CREATE INDEX IF NOT EXISTS idx_s2ndvi_mosaic_ingestion ON public.s2ndvi_mosaic (ingestion);
+CREATE INDEX IF NOT EXISTS idx_s2rgb_mosaic_ingestion ON public.s2rgb_mosaic (ingestion);
 
 -- =============================================================================
 -- PROPIEDAD DE LAS TABLAS Y SECUENCIAS

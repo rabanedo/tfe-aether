@@ -1,25 +1,13 @@
-/*
- Dump SQL
-
- Source Server         : aether-process
- Source Server Type    : PostgreSQL
- Source Server Version : 180003 (180003)
- Source Host           : localhost:5432
- Source Catalog        : postgres
- Source Schema         : catalog
-
- Target Server Type    : PostgreSQL
- Target Server Version : 180003 (180003)
- File Encoding         : 65001
-
- Date: 06/05/2026 12:12:12
-*/
-
+-- ----------------------------
+-- Schema structure
+-- ----------------------------
+CREATE SCHEMA IF NOT EXISTS "catalog";
+SET search_path = "catalog", public;
 
 -- ----------------------------
 -- Sequence structure for derived_products_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."derived_products_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."derived_products_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."derived_products_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -30,7 +18,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for download_queue_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."download_queue_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."download_queue_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."download_queue_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -41,7 +29,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for mosaic_queue_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."mosaic_queue_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."mosaic_queue_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."mosaic_queue_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -52,7 +40,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for original_products_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."original_products_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."original_products_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."original_products_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -63,7 +51,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for process_queue_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."process_queue_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."process_queue_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."process_queue_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -74,7 +62,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for system_settings_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."system_settings_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."system_settings_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."system_settings_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -85,7 +73,7 @@ CACHE 1;
 -- ----------------------------
 -- Sequence structure for workspaces_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "catalog"."workspaces_id_seq";
+DROP SEQUENCE IF EXISTS "catalog"."workspaces_id_seq" CASCADE;
 CREATE SEQUENCE "catalog"."workspaces_id_seq" 
 INCREMENT 1
 MINVALUE  1
@@ -249,32 +237,32 @@ CREATE TABLE "catalog"."workspaces" (
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."derived_products_id_seq"', 38, true);
+SELECT setval('"catalog"."derived_products_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."download_queue_id_seq"', 38, true);
+SELECT setval('"catalog"."download_queue_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."mosaic_queue_id_seq"', 14, true);
+SELECT setval('"catalog"."mosaic_queue_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."original_products_id_seq"', 30, true);
+SELECT setval('"catalog"."original_products_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."process_queue_id_seq"', 38, true);
+SELECT setval('"catalog"."process_queue_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"catalog"."system_settings_id_seq"', 7, true);
+SELECT setval('"catalog"."system_settings_id_seq"', 1, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -284,13 +272,13 @@ SELECT setval('"catalog"."workspaces_id_seq"', 1, false);
 -- ----------------------------
 -- Indexes structure for table derived_products
 -- ----------------------------
-CREATE INDEX "derived_products_idx_derived_from_uuid" ON "catalog"."derived_products" USING btree (
+CREATE INDEX IF NOT EXISTS "derived_products_idx_derived_from_uuid" ON "catalog"."derived_products" USING btree (
   "derived_from_uuid" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
-CREATE INDEX "derived_products_idx_original_product_id" ON "catalog"."derived_products" USING btree (
+CREATE INDEX IF NOT EXISTS "derived_products_idx_original_product_id" ON "catalog"."derived_products" USING btree (
   "original_product_id" "pg_catalog"."int4_ops" ASC NULLS LAST
 );
-CREATE INDEX "derived_products_idx_workspace" ON "catalog"."derived_products" USING btree (
+CREATE INDEX IF NOT EXISTS "derived_products_idx_workspace" ON "catalog"."derived_products" USING btree (
   "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST
 );
 
@@ -302,18 +290,18 @@ ALTER TABLE "catalog"."derived_products" ADD CONSTRAINT "derived_products_pkey" 
 -- ----------------------------
 -- Indexes structure for table download_queue
 -- ----------------------------
-CREATE INDEX "download_queue_idx_orbit_number" ON "catalog"."download_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "download_queue_idx_orbit_number" ON "catalog"."download_queue" USING btree (
   "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST
 );
-CREATE INDEX "download_queue_idx_sensing_date" ON "catalog"."download_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "download_queue_idx_sensing_date" ON "catalog"."download_queue" USING btree (
   "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST
 );
-CREATE INDEX "download_queue_idx_status_priority_creation" ON "catalog"."download_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "download_queue_idx_status_priority_creation" ON "catalog"."download_queue" USING btree (
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
   "priority" "pg_catalog"."int2_ops" DESC NULLS FIRST,
   "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
 );
-CREATE INDEX "download_queue_idx_workspace_status" ON "catalog"."download_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "download_queue_idx_workspace_status" ON "catalog"."download_queue" USING btree (
   "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
@@ -341,16 +329,16 @@ ALTER TABLE "catalog"."mosaic_definitions" ADD CONSTRAINT "mosaic_definitions_pk
 -- ----------------------------
 -- Indexes structure for table mosaic_queue
 -- ----------------------------
-CREATE INDEX "mosaic_queue_idx_sensing_date_orbit" ON "catalog"."mosaic_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_sensing_date_orbit" ON "catalog"."mosaic_queue" USING btree (
   "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST,
   "orbit_id" "pg_catalog"."int4_ops" ASC NULLS LAST
 );
-CREATE INDEX "mosaic_queue_idx_status_priority_creation" ON "catalog"."mosaic_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_status_priority_creation" ON "catalog"."mosaic_queue" USING btree (
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
   "priority" "pg_catalog"."int4_ops" DESC NULLS FIRST,
   "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
 );
-CREATE INDEX "mosaic_queue_idx_workspace_status" ON "catalog"."mosaic_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_workspace_status" ON "catalog"."mosaic_queue" USING btree (
   "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
@@ -373,11 +361,11 @@ ALTER TABLE "catalog"."mosaic_queue" ADD CONSTRAINT "mosaic_queue_pkey" PRIMARY 
 -- ----------------------------
 -- Indexes structure for table original_products
 -- ----------------------------
-CREATE INDEX "original_products_idx_orbit_tile" ON "catalog"."original_products" USING btree (
+CREATE INDEX IF NOT EXISTS "original_products_idx_orbit_tile" ON "catalog"."original_products" USING btree (
   "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST,
   "tile_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
-CREATE INDEX "original_products_idx_workspace_sensing_date" ON "catalog"."original_products" USING btree (
+CREATE INDEX IF NOT EXISTS "original_products_idx_workspace_sensing_date" ON "catalog"."original_products" USING btree (
   "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
   "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST
 );
@@ -394,22 +382,22 @@ ALTER TABLE "catalog"."original_products" ADD CONSTRAINT "original_products_pkey
 -- ----------------------------
 -- Indexes structure for table process_queue
 -- ----------------------------
-CREATE INDEX "process_queue_idx_product_id" ON "catalog"."process_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "process_queue_idx_product_id" ON "catalog"."process_queue" USING btree (
   "product_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
-CREATE INDEX "process_queue_idx_sensing_date_orbit" ON "catalog"."process_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "process_queue_idx_sensing_date_orbit" ON "catalog"."process_queue" USING btree (
   "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST,
   "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST
 );
-CREATE INDEX "process_queue_idx_status_priority_creation" ON "catalog"."process_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "process_queue_idx_status_priority_creation" ON "catalog"."process_queue" USING btree (
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
   "priority" "pg_catalog"."int4_ops" DESC NULLS FIRST,
   "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
 );
-CREATE INDEX "process_queue_idx_uuid" ON "catalog"."process_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "process_queue_idx_uuid" ON "catalog"."process_queue" USING btree (
   "uuid" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
-CREATE INDEX "process_queue_idx_workspace_status" ON "catalog"."process_queue" USING btree (
+CREATE INDEX IF NOT EXISTS "process_queue_idx_workspace_status" ON "catalog"."process_queue" USING btree (
   "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
   "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
