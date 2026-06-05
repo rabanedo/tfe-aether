@@ -1,0 +1,92 @@
+---
+# Aether Platform Deployment Playbook
+# Node 1 (aether-process): Sentinel-2 download and processing pipeline
+# Node 2 (aether-publish): OGC publication via GeoServer
+
+- name: Update system
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - system-update
+  tags: system-update
+
+- name: Configure servers
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - system-config
+  tags: system-config
+
+- name: NFS Setup
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - nfs-setup
+  tags: nfs-setup
+
+- name: Install and configure PostgreSQL
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - postgres
+  tags: postgres
+
+- name: Install and configure Conda
+  hosts: process
+  gather_facts: true
+  become: true
+  roles:
+    - conda
+  tags:
+    - conda
+    - aether-api
+
+- name: Deploy Aether API (Node 1)
+  hosts: process
+  gather_facts: true
+  become: true
+  roles:
+    - aether-api
+  tags: aether-api
+
+- name: Install Tomcat
+  hosts: publish
+  gather_facts: true
+  become: true
+  roles:
+    - tomcat
+  tags:
+    - tomcat
+    - geoserver
+
+- name: Configure Tomcat
+  hosts: publish
+  gather_facts: true
+  become: true
+  roles:
+    - tomcat-config
+  tags:
+    - tomcat
+    - geoserver
+
+- name: Install and configure GeoServer
+  hosts: publish
+  gather_facts: true
+  become: true
+  
+  roles:
+    - geoserver
+    - geoserver-config
+  tags: geoserver
+
+- name: Deploy publishing script (Node 2)
+  hosts: publish
+  gather_facts: true
+  become: true
+  roles:
+    - aether-publish
+  tags: aether-publish

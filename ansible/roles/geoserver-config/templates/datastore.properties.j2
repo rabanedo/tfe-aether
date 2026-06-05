@@ -1,0 +1,14 @@
+# datastore.properties
+# Index of ImageMosaic granules stored in PostgreSQL/PostGIS
+SPI=org.geotools.data.postgis.PostgisNGDataStoreFactory
+host={{ catalog_host }}
+port={{ catalog_port }}
+database={{ geoserver_db_name }}
+schema=public
+user={{ geoserver_db_user }}
+passwd={{ geoserver_db_pass }}
+Loose\ bbox=true
+Estimated\ extends=false
+validate\ connections=true
+Connection\ timeout=10
+preparedStatements=true

@@ -1,0 +1,73 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Check if GeoServer is already deployed
+  ansible.builtin.stat:
+    path: "{{ catalina_home }}/webapps/geoserver"
+  register: gs_deployed
+
+- name: Download GeoServer WAR {{ geoserver_version }}
+  ansible.builtin.get_url:
+    url: "https://sourceforge.net/projects/geoserver/files/GeoServer/{{ geoserver_version }}/geoserver-{{ geoserver_version }}-war.zip"
+    dest: "{{ temp_path }}/geoserver-{{ geoserver_version }}-war.zip"
+    mode: "0644"
+  when: not gs_deployed.stat.exists
+
+- name: Ensure destination directory exists for GeoServer extraction
+  ansible.builtin.file:
+    path: "{{ temp_path }}/geoserver-war"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+  when: not gs_deployed.stat.exists
+
+- name: Unpack GeoServer WAR
+  ansible.builtin.unarchive:
+    src: "{{ temp_path }}/geoserver-{{ geoserver_version }}-war.zip"
+    dest: "{{ temp_path }}/geoserver-war"
+    remote_src: true
+    creates: "{{ temp_path }}/geoserver-war/geoserver.war"
+  when: not gs_deployed.stat.exists
+
+- name: Copy WAR to Tomcat webapps
+  ansible.builtin.copy:
+    src: "{{ temp_path }}/geoserver-war/geoserver.war"
+    dest: "{{ catalina_home }}/webapps/geoserver.war"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0644"
+    remote_src: true
+  when: not gs_deployed.stat.exists
+  notify: Restart Tomcat
+
+- name: Wait for Tomcat to deploy the WAR (max 60s)
+  ansible.builtin.wait_for:
+    path: "{{ catalina_home }}/webapps/geoserver/WEB-INF"
+    timeout: 60
+  when: not gs_deployed.stat.exists
+
+- name: Install GeoServer extensions
+  ansible.builtin.include_tasks: install_extension.yml
+  loop: "{{ geoserver_extensions | default([]) }}"
+  loop_control:
+    loop_var: extension
+  when: not gs_deployed.stat.exists
+
+- name: Move data directory out of WAR
+  ansible.builtin.shell: |
+    cp -rn {{ catalina_home }}/webapps/geoserver/data/. {{ geoserver_data_dir }}/
+  args:
+    creates: "{{ geoserver_data_dir }}/global.xml"
+  notify: Restart Tomcat
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

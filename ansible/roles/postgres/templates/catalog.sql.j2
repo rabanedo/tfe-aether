@@ -1,0 +1,476 @@
+-- ----------------------------
+-- Schema structure
+-- ----------------------------
+CREATE SCHEMA IF NOT EXISTS "catalog";
+SET search_path = "catalog", public;
+
+-- ----------------------------
+-- Sequence structure for derived_products_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."derived_products_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."derived_products_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for download_queue_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."download_queue_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."download_queue_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for mosaic_queue_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."mosaic_queue_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."mosaic_queue_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for original_products_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."original_products_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."original_products_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for process_queue_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."process_queue_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."process_queue_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for system_settings_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."system_settings_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."system_settings_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for workspaces_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "catalog"."workspaces_id_seq" CASCADE;
+CREATE SEQUENCE "catalog"."workspaces_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Table structure for derived_products
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."derived_products";
+CREATE TABLE "catalog"."derived_products" (
+  "id" int4 NOT NULL DEFAULT nextval('derived_products_id_seq'::regclass),
+  "product_type" varchar COLLATE "pg_catalog"."default",
+  "original_product_id" int4,
+  "ingestion_date" date,
+  "url" varchar COLLATE "pg_catalog"."default",
+  "workspace_id" int4,
+  "derived_from_uuid" varchar COLLATE "pg_catalog"."default"
+)
+;
+
+-- ----------------------------
+-- Table structure for download_queue
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."download_queue";
+CREATE TABLE "catalog"."download_queue" (
+  "id" int4 NOT NULL DEFAULT nextval('download_queue_id_seq'::regclass),
+  "uuid" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
+  "priority" int2 NOT NULL DEFAULT 1,
+  "workspace_id" int4,
+  "creation_time" timestamp(6) NOT NULL DEFAULT now(),
+  "status" varchar(20) COLLATE "pg_catalog"."default",
+  "init_time" timestamp(6),
+  "product_id" varchar COLLATE "pg_catalog"."default",
+  "path" varchar COLLATE "pg_catalog"."default",
+  "ingestion_date" timestamp(6),
+  "sensing_date" date,
+  "cloud_coverage" float4,
+  "sensor" varchar COLLATE "pg_catalog"."default",
+  "orbit_number" int4,
+  "tile_id" varchar COLLATE "pg_catalog"."default",
+  "tile_data_geometry" geometry(POLYGON, 4326)
+)
+;
+
+-- ----------------------------
+-- Table structure for mosaic_definitions
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."mosaic_definitions";
+CREATE TABLE "catalog"."mosaic_definitions" (
+  "workspace_id" int4 NOT NULL,
+  "granules_list" varchar COLLATE "pg_catalog"."default" NOT NULL,
+  "source_products_names" varchar COLLATE "pg_catalog"."default",
+  "mosaic_names" varchar COLLATE "pg_catalog"."default",
+  "mosaic_paths" varchar COLLATE "pg_catalog"."default",
+  "source_products_paths" varchar COLLATE "pg_catalog"."default",
+  "orbit_id" int4 NOT NULL
+)
+;
+
+-- ----------------------------
+-- Records of mosaic_definitions
+-- ----------------------------
+INSERT INTO "catalog"."mosaic_definitions" VALUES (1, 'T29TQG T30TTM', 'S2RGB1184 S2NDVIb', 'RGB1184 NDVIb', '/warehouse/products/S2/derived_products/RGB1184_mosaic /warehouse/products/S2/derived_products/NDVIb_mosaic', '/warehouse/products/S2/derived_products/RGB1184 /warehouse/products/S2/derived_products/NDVIb', 37);
+INSERT INTO "catalog"."mosaic_definitions" VALUES (1, 'T29TQG T30TTM', 'S2RGB1184 S2NDVIb', 'RGB1184 NDVIb', '/warehouse/products/S2/derived_products/RGB1184_mosaic /warehouse/products/S2/derived_products/NDVIb_mosaic', '/warehouse/products/S2/derived_products/RGB1184 /warehouse/products/S2/derived_products/NDVIb', 137);
+
+-- ----------------------------
+-- Table structure for mosaic_queue
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."mosaic_queue";
+CREATE TABLE "catalog"."mosaic_queue" (
+  "id" int4 NOT NULL DEFAULT nextval('mosaic_queue_id_seq'::regclass),
+  "first_date" date NOT NULL,
+  "workspace_id" int4,
+  "status" varchar(10) COLLATE "pg_catalog"."default" NOT NULL,
+  "sensing_date" date,
+  "orbit_id" int4,
+  "init_time" timestamp(6),
+  "creation_time" timestamp(6) DEFAULT now(),
+  "priority" int4
+)
+;
+
+-- ----------------------------
+-- Table structure for original_products
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."original_products";
+CREATE TABLE "catalog"."original_products" (
+  "id" int4 NOT NULL DEFAULT nextval('original_products_id_seq'::regclass),
+  "url" varchar COLLATE "pg_catalog"."default",
+  "ingestion_date" date,
+  "sensing_date" date,
+  "tile_data_geometry" geometry(POLYGON, 4326),
+  "cloud_coverage" float4,
+  "sensor" varchar COLLATE "pg_catalog"."default",
+  "orbit_number" int4,
+  "tile_id" varchar COLLATE "pg_catalog"."default",
+  "product_id" varchar COLLATE "pg_catalog"."default",
+  "processed" bool,
+  "used" bool,
+  "workspace_id" int4
+)
+;
+
+-- ----------------------------
+-- Table structure for process_queue
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."process_queue";
+CREATE TABLE "catalog"."process_queue" (
+  "id" int4 NOT NULL DEFAULT nextval('process_queue_id_seq'::regclass),
+  "status" varchar(15) COLLATE "pg_catalog"."default",
+  "process_params" varchar COLLATE "pg_catalog"."default",
+  "process_command" varchar COLLATE "pg_catalog"."default",
+  "init_time" timestamp(6),
+  "finish_time" timestamp(6),
+  "input_file_path" varchar COLLATE "pg_catalog"."default" NOT NULL,
+  "workspace_id" int4,
+  "priority" int4,
+  "creation_time" timestamp(6) DEFAULT now(),
+  "product_id" varchar COLLATE "pg_catalog"."default",
+  "uuid" varchar COLLATE "pg_catalog"."default",
+  "orbit_number" int4,
+  "sensing_date" date
+)
+;
+
+-- ----------------------------
+-- Table structure for system_settings
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."system_settings";
+CREATE TABLE "catalog"."system_settings" (
+  "id" int4 NOT NULL DEFAULT nextval('system_settings_id_seq'::regclass),
+  "param_name" varchar(30) COLLATE "pg_catalog"."default" NOT NULL,
+  "value" varchar COLLATE "pg_catalog"."default" NOT NULL,
+  "units" varchar(20) COLLATE "pg_catalog"."default"
+)
+;
+
+-- ----------------------------
+-- Records of system_settings
+-- ----------------------------
+INSERT INTO "catalog"."system_settings" VALUES (1, 'download_task_timeout', '2', 'hour');
+INSERT INTO "catalog"."system_settings" VALUES (2, 'processing_task_timeout', '4', 'hour');
+
+-- ----------------------------
+-- Table structure for workspaces
+-- ----------------------------
+DROP TABLE IF EXISTS "catalog"."workspaces";
+CREATE TABLE "catalog"."workspaces" (
+  "id" int4 NOT NULL DEFAULT nextval('workspaces_id_seq'::regclass),
+  "name" varchar COLLATE "pg_catalog"."default",
+  "description" varchar COLLATE "pg_catalog"."default",
+  "geom" geometry(POLYGON, 4326),
+  "s2_user" varchar(70) COLLATE "pg_catalog"."default",
+  "s2_pass" varchar(30) COLLATE "pg_catalog"."default",
+  "s2_download_url" varchar COLLATE "pg_catalog"."default",
+  "s2_product_type" varchar(20) COLLATE "pg_catalog"."default",
+  "s2_time_range" int4,
+  "s2_download_path" varchar COLLATE "pg_catalog"."default",
+  "s2_process_command" varchar COLLATE "pg_catalog"."default",
+  "s2_process_params" varchar COLLATE "pg_catalog"."default",
+  "max_downloads_per_user" int4,
+  "log_path" varchar COLLATE "pg_catalog"."default",
+  "days_to_query_mosaic" int4,
+  "s2_granules_list" varchar COLLATE "pg_catalog"."default",
+  "active" bool,
+  "s2_collection" varchar(25) COLLATE "pg_catalog"."default",
+  "s2_max_cloud_cover" numeric DEFAULT 100
+)
+;
+
+-- ----------------------------
+-- Records of workspaces
+-- ----------------------------
+INSERT INTO "catalog"."workspaces" VALUES (1, 'aether', NULL, ST_GeomFromText('POLYGON((-6.0585461 42.2287778, -6.0576774 42.2285729, -6.049044 42.2284427, -6.046529 42.2270417, -6.0462439 42.2218713, -6.0521872 42.2137165, -6.054226 42.2102763, -6.0532147 42.2053774, -6.0522917 42.2045735, -6.0495829 42.1998818, -6.0496548 42.1973494, -6.0664084 42.1921837, -6.0728652 42.190732, -6.0725121 42.1874456, -6.0702174 42.166813, -6.0700022 42.1651168, -6.0756065 42.1618688, -6.0675016 42.1602129, -6.0572926 42.1595941, -6.0526607 42.1596725, -6.049305 42.1598608, -6.04646 42.1593421, -6.0342421 42.1582163, -6.0287781 42.1575953, -6.0236276 42.1549555, -6.0211699 42.1540395, -6.0202662 42.1537843, -6.0169519 42.1526732, -6.0135857 42.1519261, -6.0118612 42.1518003, -6.0105127 42.1515967, -6.0072683 42.15039, -6.0059681 42.149515, -6.0044089 42.1490422, -5.9956702 42.146191, -5.9925764 42.1449931, -5.989862 42.1433709, -5.9824755 42.1507315, -5.9765802 42.1605024, -5.9719614 42.1668089, -5.9711171 42.1684247, -5.9683765 42.1719447, -5.9646843 42.1750571, -5.963545 42.175807, -5.9623823 42.1763143, -5.9589529 42.1772854, -5.9582078 42.1774037, -5.942341 42.1755294, -5.941176 42.1753745, -5.9397154 42.1765106, -5.9266963 42.1863895, -5.9179884 42.1924019, -5.915952 42.1939396, -5.911482 42.1976014, -5.9060652 42.1959468, -5.9067985 42.1976752, -5.9086374 42.1997448, -5.9095292 42.2007038, -5.9104926 42.2021652, -5.9108226 42.2030213, -5.9109823 42.2041249, -5.9128805 42.2051033, -5.9143092 42.2064088, -5.914886 42.2068354, -5.9159145 42.2065481, -5.9173397 42.2072502, -5.9181358 42.2084907, -5.9219493 42.2102847, -5.9240263 42.2114564, -5.9259299 42.2122814, -5.9274305 42.2127744, -5.9321411 42.2150944, -5.9362684 42.2165827, -5.9386237 42.2182604, -5.9403679 42.2192963, -5.9440354 42.2207871, -5.9486226 42.2219929, -5.9513384 42.2225534, -5.9555998 42.2245598, -5.9576887 42.2254425, -5.9601029 42.2260286, -5.9619813 42.2262952, -5.9631612 42.2266519, -5.9638825 42.2270475, -5.9662891 42.2287593, -5.9678189 42.2311511, -5.9688836 42.2321502, -5.9707264 42.2332011, -5.9738283 42.2342283, -5.9756586 42.2352704, -5.9794634 42.2378371, -5.9854438 42.2407883, -5.9880091 42.2422433, -5.9893742 42.2429192, -5.9916202 42.2442834, -5.9964186 42.245797, -5.9986665 42.2474492, -5.9998839 42.2480747, -6.0001579 42.2482296, -6.0010275 42.2473964, -6.0037471 42.2462175, -6.0055191 42.2455046, -6.0081535 42.2440667, -6.013276 42.2378716, -6.0170641 42.2339537, -6.0177499 42.2330892, -6.0183184 42.2328131, -6.0186393 42.233444, -6.0198773 42.2332313, -6.0203704 42.2334074, -6.0210047 42.234003, -6.0215081 42.234395, -6.0220298 42.2344083, -6.0225512 42.2341604, -6.0236345 42.2337536, -6.0259473 42.2337195, -6.0272934 42.2334859, -6.0291477 42.2329866, -6.0296696 42.233014, -6.0297187 42.2330166, -6.0300765 42.2331512, -6.031597 42.2335252, -6.0320055 42.2334514, -6.0327745 42.2330618, -6.0333619 42.2329292, -6.0339903 42.2328945, -6.0350246 42.2329842, -6.0355632 42.2328439, -6.0373051 42.2312669, -6.0379444 42.2312049, -6.0398072 42.2316418, -6.0400963 42.2316071, -6.0413493 42.2312046, -6.0425586 42.2314067, -6.0430185 42.2313945, -6.0440281 42.2307193, -6.0452707 42.2301009, -6.0469143 42.2297601, -6.0492892 42.2297599, -6.0497054 42.2293436, -6.0502695 42.2293198, -6.0577829 42.2290023, -6.0585461 42.2287778))', 4326), '{{ cdse_user }}', '{{ cdse_password }}', 'https://catalogue.dataspace.copernicus.eu/download/', 'S2MSI2A', 60, '/warehouse/products/S2/original_products', '/opt/cdse-api/scripts/run_rgb_ndvi.sh', '-o /warehouse/products/S2/derived_products -t /warehouse/tmp --product_list "RGB1184 NDVIb" --product_folders --publish_list NONE --delete_source --workspace 1', 4, '/var/log/aether', 5, 'T29TQG T30TTM', 't', 'SENTINEL-2', 20);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."derived_products_id_seq"', 1, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."download_queue_id_seq"', 1, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."mosaic_queue_id_seq"', 1, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."original_products_id_seq"', 1, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."process_queue_id_seq"', 1, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."system_settings_id_seq"', (SELECT max(id) FROM "catalog"."system_settings"), true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"catalog"."workspaces_id_seq"', (SELECT max(id) FROM "catalog"."workspaces"), true);
+
+-- ----------------------------
+-- Indexes structure for table derived_products
+-- ----------------------------
+CREATE INDEX IF NOT EXISTS "derived_products_idx_derived_from_uuid" ON "catalog"."derived_products" USING btree (
+  "derived_from_uuid" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "derived_products_idx_original_product_id" ON "catalog"."derived_products" USING btree (
+  "original_product_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "derived_products_idx_workspace" ON "catalog"."derived_products" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table derived_products
+-- ----------------------------
+ALTER TABLE "catalog"."derived_products" ADD CONSTRAINT "derived_products_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table download_queue
+-- ----------------------------
+CREATE INDEX IF NOT EXISTS "download_queue_idx_orbit_number" ON "catalog"."download_queue" USING btree (
+  "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "download_queue_idx_sensing_date" ON "catalog"."download_queue" USING btree (
+  "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "download_queue_idx_status_priority_creation" ON "catalog"."download_queue" USING btree (
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
+  "priority" "pg_catalog"."int2_ops" DESC NULLS FIRST,
+  "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "download_queue_idx_workspace_status" ON "catalog"."download_queue" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Uniques structure for table download_queue
+-- ----------------------------
+ALTER TABLE "catalog"."download_queue" ADD CONSTRAINT "download_queue_uuid_key" UNIQUE ("uuid");
+
+-- ----------------------------
+-- Checks structure for table download_queue
+-- ----------------------------
+ALTER TABLE "catalog"."download_queue" ADD CONSTRAINT "download_queue_status_chk" CHECK (status IS NULL OR (status::text = ANY (ARRAY['waiting'::text, 'downloading'::text, 'completed'::text, 'skipped'::text, 'cancelled'::text, 'error'::text])));
+
+-- ----------------------------
+-- Primary Key structure for table download_queue
+-- ----------------------------
+ALTER TABLE "catalog"."download_queue" ADD CONSTRAINT "download_queue_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table mosaic_definitions
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_definitions" ADD CONSTRAINT "mosaic_definitions_pkey" PRIMARY KEY ("workspace_id", "orbit_id");
+
+-- ----------------------------
+-- Indexes structure for table mosaic_queue
+-- ----------------------------
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_sensing_date_orbit" ON "catalog"."mosaic_queue" USING btree (
+  "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST,
+  "orbit_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_status_priority_creation" ON "catalog"."mosaic_queue" USING btree (
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
+  "priority" "pg_catalog"."int4_ops" DESC NULLS FIRST,
+  "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "mosaic_queue_idx_workspace_status" ON "catalog"."mosaic_queue" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Uniques structure for table mosaic_queue
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_queue" ADD CONSTRAINT "mosaic_queue_uq_operational" UNIQUE ("workspace_id", "orbit_id", "sensing_date");
+
+-- ----------------------------
+-- Checks structure for table mosaic_queue
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_queue" ADD CONSTRAINT "mosaic_queue_status_chk" CHECK (status::text = ANY (ARRAY['waiting'::character varying, 'processing'::character varying, 'completed'::character varying, 'error'::character varying, 'cancelled'::character varying]::text[]));
+
+-- ----------------------------
+-- Primary Key structure for table mosaic_queue
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_queue" ADD CONSTRAINT "mosaic_queue_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table original_products
+-- ----------------------------
+CREATE INDEX IF NOT EXISTS "original_products_idx_orbit_tile" ON "catalog"."original_products" USING btree (
+  "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "tile_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "original_products_idx_workspace_sensing_date" ON "catalog"."original_products" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST
+);
+CREATE UNIQUE INDEX "original_products_uq_workspace_product_id" ON "catalog"."original_products" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "product_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+) WHERE product_id IS NOT NULL;
+
+-- ----------------------------
+-- Primary Key structure for table original_products
+-- ----------------------------
+ALTER TABLE "catalog"."original_products" ADD CONSTRAINT "original_products_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table process_queue
+-- ----------------------------
+CREATE INDEX IF NOT EXISTS "process_queue_idx_product_id" ON "catalog"."process_queue" USING btree (
+  "product_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "process_queue_idx_sensing_date_orbit" ON "catalog"."process_queue" USING btree (
+  "sensing_date" "pg_catalog"."date_ops" ASC NULLS LAST,
+  "orbit_number" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "process_queue_idx_status_priority_creation" ON "catalog"."process_queue" USING btree (
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST,
+  "priority" "pg_catalog"."int4_ops" DESC NULLS FIRST,
+  "creation_time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "process_queue_idx_uuid" ON "catalog"."process_queue" USING btree (
+  "uuid" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+CREATE INDEX IF NOT EXISTS "process_queue_idx_workspace_status" ON "catalog"."process_queue" USING btree (
+  "workspace_id" "pg_catalog"."int4_ops" ASC NULLS LAST,
+  "status" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Checks structure for table process_queue
+-- ----------------------------
+ALTER TABLE "catalog"."process_queue" ADD CONSTRAINT "process_queue_status_chk" CHECK (status IS NULL OR (status::text = ANY (ARRAY['waiting'::character varying::text, 'processing'::character varying::text, 'completed'::character varying::text, 'error'::character varying::text, 'cancelled'::character varying::text])));
+
+-- ----------------------------
+-- Primary Key structure for table process_queue
+-- ----------------------------
+ALTER TABLE "catalog"."process_queue" ADD CONSTRAINT "process_queue_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Uniques structure for table system_settings
+-- ----------------------------
+ALTER TABLE "catalog"."system_settings" ADD CONSTRAINT "system_settings_param_name_key" UNIQUE ("param_name");
+
+-- ----------------------------
+-- Primary Key structure for table system_settings
+-- ----------------------------
+ALTER TABLE "catalog"."system_settings" ADD CONSTRAINT "system_settings_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table workspaces
+-- ----------------------------
+ALTER TABLE "catalog"."workspaces" ADD CONSTRAINT "workspaces_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Foreign Keys structure for table derived_products
+-- ----------------------------
+ALTER TABLE "catalog"."derived_products" ADD CONSTRAINT "derived_products_original_product_id_fkey" FOREIGN KEY ("original_product_id") REFERENCES "catalog"."original_products" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "catalog"."derived_products" ADD CONSTRAINT "derived_products_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table download_queue
+-- ----------------------------
+ALTER TABLE "catalog"."download_queue" ADD CONSTRAINT "download_queue_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table mosaic_definitions
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_definitions" ADD CONSTRAINT "mosaic_definitions_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table mosaic_queue
+-- ----------------------------
+ALTER TABLE "catalog"."mosaic_queue" ADD CONSTRAINT "mosaic_queue_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table original_products
+-- ----------------------------
+ALTER TABLE "catalog"."original_products" ADD CONSTRAINT "original_products_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Keys structure for table process_queue
+-- ----------------------------
+ALTER TABLE "catalog"."process_queue" ADD CONSTRAINT "process_queue_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "catalog"."workspaces" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

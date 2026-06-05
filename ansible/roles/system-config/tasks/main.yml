@@ -1,0 +1,33 @@
+- name: Create aether system group
+  ansible.builtin.group:
+    name:   "{{ sys_group }}"
+    gid:    "{{ sys_gid }}"
+    system: true
+    state:  present
+
+- name: Create aether system user
+  ansible.builtin.user:
+    name:       "{{ sys_user }}"
+    uid:        "{{ sys_uid }}"
+    group:      "{{ sys_group }}"
+    shell:      /bin/bash
+    home:       "/home/{{ sys_user }}"
+    createhome: true
+    system:     true
+    state:      present
+
+- name: Create logs directory
+  ansible.builtin.file:
+    path:  "{{ logs_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Configure logrotate for aether logs
+  ansible.builtin.template:
+    src:   logrotate-aether.j2
+    dest:  "{{ rotate_path }}/aether"
+    owner: root
+    group: root
+    mode:  "0644"

@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: Rubén Rabanedo Aldonza
+  description: Configure virtual environments for conda
+  company: UNIR - TFE GII
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  license: GPL-3.0-or-later
+
+  min_ansible_version: "2.10"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+
+  galaxy_tags:
+    - system
+    - update
+    - apt
+
+dependencies: []

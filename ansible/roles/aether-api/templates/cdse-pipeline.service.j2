@@ -1,0 +1,17 @@
+[Unit]
+Description=Aether - Sentinel-2 pipeline execution
+After=network.target cdse-api.service
+
+[Service]
+Type=oneshot
+User={{ sys_user }}
+Group={{ sys_group }}
+Environment="PATH={{ api_conda_base }}/envs/{{ api_conda_env }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+EnvironmentFile={{ api_base_dir }}/.env
+ExecStart=/usr/bin/curl -sS -X POST \
+    http://127.0.0.1:{{ api_port }}/api/v1/pipeline/run \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${CDSE_API_TOKEN}" \
+    -d "{}"
+StandardOutput=journal
+StandardError=journal

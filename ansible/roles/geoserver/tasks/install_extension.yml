@@ -1,0 +1,23 @@
+---
+- name: "Download extension {{ extension }}"
+  ansible.builtin.get_url:
+    url: "https://sourceforge.net/projects/geoserver/files/GeoServer/{{ geoserver_version }}/extensions/geoserver-{{ geoserver_version }}-{{ extension }}-plugin.zip"
+    dest: "{{ temp_path }}/gs-ext-{{ extension }}.zip"
+    mode: "0644"
+    timeout: 30
+
+- name: "Extract extension {{ extension }}"
+  ansible.builtin.unarchive:
+    src: "{{ temp_path }}/gs-ext-{{ extension }}.zip"
+    dest: "{{ catalina_home }}/webapps/geoserver/WEB-INF/lib/"
+    remote_src: true
+
+- name: "Set owner of JARs of {{ extension }}"
+  ansible.builtin.shell:
+    cmd: chown {{ sys_user }}:{{ sys_group }} {{ catalina_home }}/webapps/geoserver/WEB-INF/lib/*{{ extension }}*.jar
+  changed_when: true
+
+- name: "Remove zip file from the {{ extension }} extension"
+  ansible.builtin.file:
+    path: "{{ temp_path }}/gs-ext-{{ extension }}.zip"
+    state: absent

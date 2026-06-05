@@ -1,0 +1,33 @@
+---
+# ============================================================================
+# Default variables for the Miniconda / Aether API role
+# ============================================================================
+
+# --- System Paths ---
+api_conda_base: /opt/miniconda3
+
+temp_path: /tmp
+
+# --- Download Miniconda ---
+conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+
+# --- Virtual Environment Configuration ---
+api_conda_env: cdse-api
+
+conda_packages:
+  - gdal
+  - proj
+  - geos
+  - libgdal-jp2openjpeg
+
+pip_packages:
+  - "fastapi==0.136.1"
+  - "uvicorn[standard]==0.46.0"
+  - "pydantic==2.13.3"
+  - "psycopg2-binary==2.9.12"
+  - "cdsetool==0.3.1"
+  - "requests==2.33.1"
+
+conda_terms:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r

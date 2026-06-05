@@ -1,0 +1,21 @@
+[Unit]
+Description=Aether API - Pipeline Sentinel-2
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User={{ sys_user }}
+Group={{ sys_group }}
+WorkingDirectory={{ api_base_dir }}
+EnvironmentFile={{ api_base_dir }}/.env
+ExecStart={{ api_conda_base }}/envs/{{ api_conda_env }}/bin/uvicorn \
+    app.api.main:app \
+    --host 0.0.0.0 \
+    --port {{ api_port }}
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

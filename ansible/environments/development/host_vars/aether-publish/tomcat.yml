@@ -1,0 +1,7 @@
+---
+catalina_home: /opt/tomcat9
+catalina_base: /opt/tomcat9
+catalina_pid: /opt/tomcat9/temp/tomcat.pid
+t9_logs: /opt/tomcat9/logs
+xms: 512m
+xmx: 2g

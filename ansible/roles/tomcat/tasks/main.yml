@@ -1,0 +1,87 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Install OpenJDK {{ java_version }}
+  ansible.builtin.apt:
+    name: "openjdk-{{ java_version }}-jdk"
+    state: present
+
+- name: Check if Tomcat is already installed
+  ansible.builtin.stat:
+    path: "{{ catalina_home }}/bin/catalina.sh"
+  register: tomcat_bin
+
+- name: Download Tomcat {{ tomcat_version }}
+  ansible.builtin.get_url:
+    url: "{{ tomcat_download_url }}/v{{ tomcat_version }}/bin/{{ tomcat_name }}.tar.gz"
+    dest: "{{ temp_path }}/{{ tomcat_name }}.tar.gz"
+    mode: "0644"
+  when: not tomcat_bin.stat.exists
+
+- name: Unpacking Tomcat
+  ansible.builtin.unarchive:
+    src: "{{ temp_path }}/{{ tomcat_name }}.tar.gz"
+    dest: /opt
+    remote_src: true
+    creates: "{{ catalina_home }}"
+  when: not tomcat_bin.stat.exists
+
+- name: Create a symbolic link from {{ catalina_home }} to the live version
+  ansible.builtin.file:
+    src: "/opt/{{ tomcat_name }}"
+    dest: "{{ catalina_home }}"
+    state: link
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+  when: not tomcat_bin.stat.exists
+
+- name: Adjust Tomcat directory owner and permissions
+  ansible.builtin.file:
+    path: "/opt/{{ tomcat_name }}"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    recurse: true
+  when: not tomcat_bin.stat.exists
+
+- name: Create GeoServer data directory
+  ansible.builtin.file:
+    path: "{{ geoserver_data_dir }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+
+- name: Install setenv.sh
+  ansible.builtin.template:
+    src: setenv.sh.j2
+    dest: "{{ catalina_home }}/bin/setenv.sh"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+
+- name: Install unit systemd from Tomcat
+  ansible.builtin.template:
+    src: tomcat9.service.j2
+    dest: /etc/systemd/system/{{ tomcat_service }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Tomcat
+
+- name: Enable and start Tomcat
+  ansible.builtin.systemd:
+    name: "{{ tomcat_service }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

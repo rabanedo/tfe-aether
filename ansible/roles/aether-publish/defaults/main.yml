@@ -1,0 +1,30 @@
+---
+# ==============================================================================
+# Aether Publish Configuration Defaults
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# System Integration
+# ------------------------------------------------------------------------------
+sys_user: "aether_user"
+sys_group: "aether_group"
+temp_path: "/tmp/aether_publish"
+publish_base_dir: "/opt/cdse-publish"
+
+# ------------------------------------------------------------------------------
+# Repository Configuration
+# ------------------------------------------------------------------------------
+api_repo_url: "https://github.com/tu-usuario/aether.git"
+api_repo_version: "main"
+
+# ------------------------------------------------------------------------------
+# GeoServer Integration
+# ------------------------------------------------------------------------------
+geoserver_rest_url: "http://localhost:8080/geoserver/rest"
+geoserver_products_path: "/opt/geoserver_data/data/aether"
+
+# ------------------------------------------------------------------------------
+# Credentials
+# ------------------------------------------------------------------------------
+geoserver_username: "admin"
+geoserver_password: "admin_default_password_change_me"

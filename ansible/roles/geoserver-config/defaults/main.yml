@@ -1,0 +1,36 @@
+---
+# =============================================================================
+# Default variables of the GeoServer Config (ImageMosaic) role
+# =============================================================================
+
+# --- System and Permissions ---
+sys_user: aether
+sys_group: aether
+
+# --- GeoServer REST API Authentication ---
+# Default values for a newly installed GeoServer.
+# Overwrite the production Vault if the admin password is changed!
+geoserver_username: admin
+geoserver_password: geoserver
+
+# --- Workspace and Storage Configuration ---
+geoserver_workspace: aether
+
+# Route where the images reside (the destination of Tomcat's Bind Mounts)
+geoserver_products_path: /dwh/data/products/S2/derived_products
+
+# List of Coverage Stores to create in the workspace.
+# In your case, this corresponds to the folders of the calculated products.
+geoserver_stores:
+  - RGB1184
+  - NDVIb
+
+# --- Database Connection (PostGIS Catalog) ---
+# Used in datastore.properties.j2 to link the ImageMosaic with PostgreSQL
+catalog_host: localhost
+catalog_port: 5432
+geoserver_db_name: aether
+
+# Read/write credentials for the public schema where the tables s2ndvi, s2rgb, etc. are located.
+geoserver_db_user: aether_user
+geoserver_db_pass: "ContraseñaSegura123"

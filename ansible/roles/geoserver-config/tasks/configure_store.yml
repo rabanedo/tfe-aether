@@ -1,0 +1,32 @@
+---
+# Create the .properties files that GeoServer needs in the directory
+# of each coveragestore ImageMosaic before initialization.
+
+- name: "Create datastore.properties for {{ store }}"
+  ansible.builtin.template:
+    src: datastore.properties.j2
+    dest: "{{ geoserver_products_path }}/{{ store }}/datastore.properties"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0640"
+  no_log: true
+
+- name: "Create indexer.properties for {{ store }}"
+  ansible.builtin.copy:
+    dest: "{{ geoserver_products_path }}/{{ store }}/indexer.properties"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0644"
+    content: |
+      TimeAttribute=ingestion
+      Schema=*the_geom:Polygon,location:String,ingestion:java.util.Date
+      PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)
+
+- name: "Create timeregex.properties for {{ store }}"
+  ansible.builtin.copy:
+    dest: "{{ geoserver_products_path }}/{{ store }}/timeregex.properties"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0644"
+    content: |
+      regex=^[0-9]{8}(?=_)

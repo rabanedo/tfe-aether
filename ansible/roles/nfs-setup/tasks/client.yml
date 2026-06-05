@@ -1,0 +1,22 @@
+---
+- name: Install NFS client utilities
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+    update_cache: true
+
+- name: Create assembly point (Customer)
+  ansible.builtin.file:
+    path: "{{ nfs_mount_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0775"
+
+- name: Mount NFS volume and register in /etc/fstab
+  ansible.posix.mount:
+    src: "{{ nfs_server_ip }}:{{ nfs_export_path }}"
+    path: "{{ nfs_mount_path }}"
+    fstype: nfs
+    opts: rw,sync,hard,_netdev
+    state: mounted

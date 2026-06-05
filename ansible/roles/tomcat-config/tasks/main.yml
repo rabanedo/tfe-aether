@@ -1,0 +1,12 @@
+---
+# Additional Tomcat post-installation configuration:
+# Manager users configuration
+- name: Configure Tomcat Manager users (tomcat-users.xml)
+  ansible.builtin.template:
+    src: tomcat-users.xml.j2
+    dest: "{{ catalina_home }}/conf/tomcat-users.xml"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0640"
+  no_log: true
+  notify: Restart Tomcat

@@ -1,0 +1,20 @@
+---
+apt_packages:
+  - curl
+  - wget
+  - unzip
+  - git
+  - acl
+  - python3
+  - python3-requests
+
+# Bind mounts: source (Node 1 via NFS or shared path) → mount point
+bind_mounts:
+  - src: /dwh/products/S2/derived_products/NDVIb
+    dst: /dwh/data/s2ndvi
+  - src: /dwh/products/S2/derived_products/RGB1184
+    dst: /dwh/data/s2rgb
+  - src: /dwh/products/S2/derived_products/NDVIb_mosaic
+    dst: /dwh/data/s2ndvi_mosaic
+  - src: /dwh/products/S2/derived_products/RGB1184_mosaic
+    dst: /dwh/data/s2rgb_mosaic

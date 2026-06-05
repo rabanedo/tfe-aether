@@ -1,0 +1,25 @@
+# Ansible vault - nunca subir sin cifrar
+group_vars/all/applications_encrypted.yml
+environments/*/host_vars/*/applications_encrypted.yml
+environments/*/host_vars/*/postgres_encrypted.yml
+environments/*/host_vars/*/tomcat_encrypted.yml
+.vault_pass
+
+# Ficheros de entorno y configuración con credenciales
+*.env
+config.txt
+
+# Artefactos de Ansible
+*.retry
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*~

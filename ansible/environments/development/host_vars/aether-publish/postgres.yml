@@ -1,0 +1,6 @@
+---
+install_postgres: true
+postgres_db_path: /var/lib/postgresql/18/main
+db_name: aether
+db_schema: public
+sql_schema_file: aether-publish.sql

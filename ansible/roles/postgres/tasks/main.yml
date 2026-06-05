@@ -1,0 +1,141 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Install PostgreSQL pre-dependencies
+  ansible.builtin.apt:
+    name:
+      - gnupg2
+      - curl
+      - ca-certificates
+      - python3-psycopg2
+    state: present
+
+- name: Ensure that the keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode:  "0755"
+
+- name: Download PostgreSQL GPG key
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /etc/apt/keyrings/postgresql.asc
+    mode: "0644"
+
+- name: Add PGDG repository with signed-by
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_facts['distribution_release'] }}-pgdg main"
+    state: present
+    filename: pgdg
+
+- name: Install PostgreSQL 18 and PostGIS
+  ansible.builtin.apt:
+    name: "{{ postgres_packages }}"
+    state: present
+    update_cache: true
+  when: install_postgres | bool
+
+- name: Ensure that PostgreSQL is started and enabled
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: true
+  when: install_postgres | bool
+
+- name: Create database
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    state: present
+  become_user: postgres
+  when: install_postgres | bool
+
+- name: Activate PostGIS extension
+  community.postgresql.postgresql_ext:
+    name: postgis
+    login_db: "{{ db_name }}"
+    state: present
+  become_user: postgres
+  when: install_postgres | bool
+
+- name: Create database user
+  community.postgresql.postgresql_user:
+    login_db: "{{ db_name }}"
+    name: "{{ catalog_username }}"
+    password: "{{ catalog_password }}"
+    state: present
+  become_user: postgres
+  when: install_postgres | bool
+  no_log: true
+
+- name: Deploy SQL schema template
+  ansible.builtin.template:
+    src: "{{ sql_schema_file }}.j2"
+    dest: "{{ temp_path }}/{{ sql_schema_file }}"
+    owner: postgres
+    group: postgres
+    mode: "0644"
+  when:
+    - install_postgres | bool
+    - sql_schema_file is defined
+
+- name: Load SQL schema
+  community.postgresql.postgresql_script:
+    login_db: "{{ db_name }}"
+    path: "{{ temp_path }}/{{ sql_schema_file }}"
+  become_user: postgres
+  when:
+    - install_postgres | bool
+    - sql_schema_file is defined
+
+- name: Grant usage and create permission on the schema to the user
+  community.postgresql.postgresql_privs:
+    login_db: "{{ db_name }}"
+    objs: "{{ db_schema | default('public') }}"
+    type: schema
+    roles: "{{ catalog_username }}"
+    privs: USAGE,CREATE
+  become_user: postgres
+  when: install_postgres | bool
+
+- name: Grant permissions on all tables in the schema
+  community.postgresql.postgresql_privs:
+    login_db: "{{ db_name }}"
+    schema: "{{ db_schema | default('public') }}"
+    objs: ALL_IN_SCHEMA
+    type: table
+    roles: "{{ catalog_username }}"
+    privs: SELECT,INSERT,UPDATE,DELETE
+  become_user: postgres
+  when: install_postgres | bool
+
+- name: Grant permissions on all sequences in the scheme
+  community.postgresql.postgresql_privs:
+    login_db: "{{ db_name }}"
+    schema: "{{ db_schema | default('public') }}"
+    objs: ALL_IN_SCHEMA
+    type: sequence
+    roles: "{{ catalog_username }}"
+    privs: USAGE,SELECT,UPDATE
+  become_user: postgres
+  when: install_postgres | bool
+
+- name: Configure pg_hba.conf
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: /etc/postgresql/18/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: "0640"
+  notify: Reload PostgreSQL
+  when: install_postgres | bool
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

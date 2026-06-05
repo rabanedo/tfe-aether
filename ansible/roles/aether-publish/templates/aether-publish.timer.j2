@@ -1,0 +1,11 @@
+[Unit]
+Description=Aether - Timer for periodic publishing in GeoServer
+Requires=aether-publish.service
+
+[Timer]
+# 270 minutos después del pipeline de procesamiento (01:30 → 06:00)
+OnCalendar=*-*-* 06:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+---
+- name: Run NFS Server (Publish) tasks
+  ansible.builtin.include_tasks: server.yml
+  when: inventory_hostname == 'aether-publish'
+
+- name: Execute NFS Client tasks (Process)
+  ansible.builtin.include_tasks: client.yml
+  when: inventory_hostname == 'aether-process'

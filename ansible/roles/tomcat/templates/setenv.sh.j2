@@ -1,0 +1,9 @@
+#!/bin/bash
+# setenv.sh - generado por Ansible
+export JAVA_HOME={{ java_home }}
+export CATALINA_HOME={{ catalina_home }}
+export CATALINA_BASE={{ catalina_base }}
+export GEOSERVER_DATA_DIR={{ geoserver_data_dir }}
+export CATALINA_OPTS="-Xms{{ xms }} -Xmx{{ xmx }} -XX:+UseG1GC"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dfile.encoding=UTF-8"
+export CATALINA_OPTS="${CATALINA_OPTS} -Djava.awt.headless=true"

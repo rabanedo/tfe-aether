@@ -1,0 +1,19 @@
+# =============================================================================
+# pg_hba.conf - Aether Platform (Powered by Ansible)
+# =============================================================================
+# NOTE: PostgreSQL applies the FIRST matching rule. Order matters.
+
+# TYPE  DATABASE        USER                    ADDRESS         METHOD
+
+# 1. Administrative Superuser (Local connection via Unix socket)
+local   all             postgres                                peer
+
+# 2. Specific Aether application access (Greater specificity)
+local   {{ db_name }}   {{ catalog_username }}                  scram-sha-256
+host    {{ db_name }}   {{ catalog_username }}  127.0.0.1/32    scram-sha-256
+host    {{ db_name }}   {{ catalog_username }}  ::1/128         scram-sha-256
+
+# 3. Generic contingency access / Other local users
+local   all             all                                     peer
+host    all             all                     127.0.0.1/32    scram-sha-256
+host    all             all                     ::1/128         scram-sha-256

@@ -1,0 +1,16 @@
+---
+- name: Restart Tomcat
+  ansible.builtin.systemd:
+    name: "{{ tomcat_service }}"
+    state: restarted
+  register: tomcat_restart
+  notify: Wait for GeoServer
+
+- name: Wait for GeoServer
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/web/"
+    status_code: 200
+  register: gs_response
+  until: gs_response.status == 200
+  retries: 12
+  delay: 10

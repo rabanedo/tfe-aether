@@ -1,0 +1,80 @@
+---
+# =============================================================================
+# global_vars/applications.yml - Non-sensitive global variables
+# =============================================================================
+
+# --- System -------------------------------------------------------------
+sys_user: aether
+sys_group: aether
+logs_path: /var/log/aether
+rotate_path: /etc/logrotate.d
+temp_path: /tmp/aether
+
+# Postgres
+postgres_packages:
+  - postgresql-18
+  - postgresql-18-postgis-3
+
+# Application repository source
+api_repo_url: "https://github.com/rabanedo/tfe-aether.git"
+api_repo_version: "main"
+
+# --- Node 1: Aether API (aether-process) ---------------------------------
+api_base_dir: /opt/cdse-api
+api_conda_env: cdse-api
+api_conda_base: /opt/miniconda3
+api_port: 8080
+api_log_file: cdse_api.log
+
+conda_installer_url: >-
+  https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+conda_packages:
+  - gdal
+  - proj
+  - geos
+  - libgdal-jp2openjpeg
+
+pip_packages:
+  - "fastapi==0.136.1"
+  - "uvicorn[standard]==0.46.0"
+  - "pydantic==2.13.3"
+  - "psycopg2-binary==2.9.12"
+  - "cdsetool==0.3.1"
+  - "requests==2.33.1"
+
+conda_terms:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+
+# --- Node 2: GeoServer (aether-publish) ----------------------------------
+geoserver_version: 2.28.4
+geoserver_data_dir: /opt/geoserver_data
+publish_base_dir: /opt/aether-publish
+publish_products_dir: /dwh/data
+
+tomcat_version: 9.0.118
+tomcat_name: "apache-tomcat-{{ tomcat_version }}"
+tomcat_home: /opt/tomcat9
+tomcat_service: tomcat9
+tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-9/"
+java_version: 17
+java_home: /usr/lib/jvm/java-17-openjdk-amd64
+
+# NFS paths
+nfs_export_path: "/dwh"
+nfs_mount_path: "/warehouse"
+
+# GeoServer extensions to install (in addition to the base one that includes ImageMosaic)
+geoserver_extensions:
+  - pyramid
+  - gdal
+  - css
+
+# ImageMosaic products managed by publish.py
+geoserver_workspace: aether
+geoserver_stores:
+  - s2ndvi
+  - s2rgb
+  - s2ndvi_mosaic
+  - s2rgb_mosaic

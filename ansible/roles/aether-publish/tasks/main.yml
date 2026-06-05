@@ -1,0 +1,91 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Create publish base directory
+  ansible.builtin.file:
+    path: "{{ publish_base_dir }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+
+- name: Ensure that git is installed
+  ansible.builtin.apt:
+    name: git
+    state: present
+  become: true
+
+- name: Clone the official aether repository
+  ansible.builtin.git:
+    repo: "{{ api_repo_url }}"
+    dest: "{{ temp_path }}/tfe-aether-repo"
+    version: "{{ api_repo_version | default('main') }}"
+    force: true
+  become_user: "{{ sys_user }}"
+
+- name: Synchronize the aether-publish folder to the base directory
+  ansible.posix.synchronize:
+    src: "{{ temp_path }}/tfe-aether-repo/aether-publish/"
+    dest: "{{ publish_base_dir }}/"
+    archive: true
+    delete: true
+    checksum: true
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Ensure correct ownership in the publish directory
+  ansible.builtin.file:
+    path: "{{ publish_base_dir }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    recurse: true
+
+- name: Make run_publish.sh executable
+  ansible.builtin.file:
+    path: "{{ publish_base_dir }}/scripts/run_publish.sh"
+    mode: "0755"
+
+- name: Generate .env file for Node 2
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ publish_base_dir }}/.env"
+    owner: root
+    group: "{{ sys_group }}"
+    mode: "0640"
+  no_log: true
+
+- name: Install unit aether-publish.service
+  ansible.builtin.template:
+    src: aether-publish.service.j2
+    dest: /etc/systemd/system/aether-publish.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Install unit aether-publish.timer
+  ansible.builtin.template:
+    src: aether-publish.timer.j2
+    dest: /etc/systemd/system/aether-publish.timer
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Enable publishing timer
+  ansible.builtin.systemd:
+    name: aether-publish.timer
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

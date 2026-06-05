@@ -1,0 +1,14 @@
+---
+# =============================================================================
+# Default variables for the System Update role
+# =============================================================================
+
+# --- Packages ---
+apt_packages:
+  - curl
+  - wget
+  - unzip
+  - git
+  - python3
+  - python3-pip
+  - build-essential

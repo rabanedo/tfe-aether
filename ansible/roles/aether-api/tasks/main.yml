@@ -1,0 +1,136 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Create API directory
+  ansible.builtin.file:
+    path: "{{ api_base_dir }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+
+- name: Ensure that git is installed
+  ansible.builtin.apt:
+    name: git
+    state: present
+  become: true
+
+- name: Clone the official aether repository
+  ansible.builtin.git:
+    repo: "{{ api_repo_url }}"
+    dest: "{{ temp_path }}/tfe-aether-repo"
+    version: "{{ api_repo_version | default('main') }}"
+    force: true
+  become_user: "{{ sys_user }}"
+
+- name: Synchronize the aether-process folder to the API base directory
+  ansible.posix.synchronize:
+    src: "{{ temp_path }}/tfe-aether-repo/aether-process/"
+    dest: "{{ api_base_dir }}/"
+    archive: true
+    delete: true
+    checksum: true
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Ensure correct permissions and ownership in the API directory
+  ansible.builtin.file:
+    path: "{{ api_base_dir }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    recurse: true
+
+- name: Make shell scripts executable
+  ansible.builtin.file:
+    path: "{{ api_base_dir }}/scripts/{{ item }}"
+    mode: "0755"
+  loop:
+    - run_api.sh
+    - run_jobs.sh
+    - run_rgb_ndvi.sh
+
+- name: Make python scripts executable
+  ansible.builtin.file:
+    path: "{{ api_base_dir }}/app/services/{{ item }}"
+    mode: "0755"
+  loop:
+    - rgb_ndvi.py
+    - s2_processor.py
+
+- name: Generate config.txt with vault variables
+  ansible.builtin.template:
+    src: config.txt.j2
+    dest: "{{ api_base_dir }}/config.txt"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0640"
+  no_log: true
+
+- name: Generate .env environment file
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ api_base_dir }}/.env"
+    owner: root
+    group: "{{ sys_group }}"
+    mode: "0640"
+  no_log: true
+
+- name: Create workspace data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+  loop: "{{ api_dwh_directories }}"
+
+- name: Install unit cdse-api.service
+  ansible.builtin.template:
+    src: cdse-api.service.j2
+    dest: /etc/systemd/system/cdse-api.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Install unit cdse-pipeline.service
+  ansible.builtin.template:
+    src: cdse-pipeline.service.j2
+    dest: /etc/systemd/system/cdse-pipeline.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Install unit cdse-pipeline.timer
+  ansible.builtin.template:
+    src: cdse-pipeline.timer.j2
+    dest: /etc/systemd/system/cdse-pipeline.timer
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Ensure that cdse-api.service is enabled and started
+  ansible.builtin.systemd:
+    name: cdse-api.service
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Ensure that cdse-pipeline.timer is enabled and started
+  ansible.builtin.systemd:
+    name: cdse-pipeline.timer
+    state: started
+    enabled: true
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

@@ -1,0 +1,67 @@
+---
+- name: Create temporary directory
+  ansible.builtin.file:
+    path:  "{{ temp_path }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode:  "0755"
+
+- name: Check if Miniconda is already installed
+  ansible.builtin.stat:
+    path: "{{ api_conda_base }}/bin/conda"
+  register: conda_bin
+
+- name: Download Miniconda installer
+  ansible.builtin.get_url:
+    url: "{{ conda_installer_url }}"
+    dest: "{{ temp_path }}/miniconda_installer.sh"
+    mode: "0755"
+  when: not conda_bin.stat.exists
+
+- name: Install Miniconda
+  ansible.builtin.command:
+    cmd: bash {{ temp_path }}/miniconda_installer.sh -b -p {{ api_conda_base }}
+  args:
+    creates: "{{ api_conda_base }}/bin/conda"
+
+- name: Apply conda dependency file template
+  ansible.builtin.template:
+    src: mconda_env.yml.j2
+    dest: "{{ temp_path }}/mconda_env.yml"
+    mode: "0644"
+
+- name: Accept Miniconda's terms of service
+  ansible.builtin.command:
+    cmd: "{{ api_conda_base }}/bin/conda tos accept --override-channels --channel {{ item }}"
+  loop: "{{ conda_terms }}"
+  changed_when: false
+
+- name: Synchronize conda environment (Create or Update)
+  ansible.builtin.command:
+    cmd: >
+      {{ api_conda_base }}/bin/conda env update 
+      -p {{ api_conda_base }}/envs/{{ api_conda_env }} 
+      -f {{ temp_path }}/mconda_env.yml --prune
+  register: conda_update
+  changed_when: conda_update.stderr | length > 0
+
+- name: Initialize Miniconda in the user's .bashrc
+  ansible.builtin.command:
+    cmd: "{{ api_conda_base }}/bin/conda init bash"
+  become_user: "{{ sys_user }}"
+  changed_when: false
+
+- name: Automatically activate the cdse-api environment upon login
+  ansible.builtin.lineinfile:
+    path: "/home/{{ sys_user }}/.bashrc"
+    line: "conda activate {{ api_conda_base }}/envs/{{ api_conda_env }}"
+    state: present
+    create: true
+    owner: "{{ sys_user }}"
+    mode: "0644"
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ temp_path }}"
+    state: absent

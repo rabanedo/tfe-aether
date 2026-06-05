@@ -1,0 +1,239 @@
+---
+- name: Wait for GeoServer to start up
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/web/"
+    status_code: 200
+  register: gs_check
+  until: gs_check.status == 200
+  retries: 18
+  delay: 10
+
+- name: Create aether Workspace
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces"
+    method: POST
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      workspace:
+        name: "{{ geoserver_workspace }}"
+    status_code: [201, 409]
+  no_log: true
+
+- name: Create mount directories for ImageMosaic
+  ansible.builtin.file:
+    path: "{{ geoserver_products_path }}/{{ item }}"
+    state: directory
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0755"
+  loop: "{{ geoserver_stores }}"
+
+- name: Create ImageMosaic configuration files in each store
+  ansible.builtin.include_tasks: configure_store.yml
+  loop: "{{ geoserver_stores }}"
+  loop_control:
+    loop_var: store
+
+# --- COVERAGES MANAGEMENT ---
+- name: Check if coverage stores already exist in GeoServer
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/coveragestores/{{ store_item }}.json"
+    method: GET
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    status_code: [200, 404]
+  loop: "{{ geoserver_stores }}"
+  loop_control:
+    loop_var: store_item
+  register: gs_store_check
+  no_log: true
+
+- name: Remove obsolete index tables (if store does not exist in GeoServer)
+  community.postgresql.postgresql_table:
+    login_host: "{{ catalog_host }}"
+    login_user: "{{ geoserver_db_user }}"
+    login_password: "{{ geoserver_db_pass }}"
+    login_db: "{{ geoserver_db_name }}"
+    name: "{{ item.store_item }}"
+    state: absent
+    cascade: true
+  loop: "{{ gs_store_check.results }}"
+  loop_control:
+    label: "{{ item.store_item }}"
+  when: item.status == 404
+  no_log: true
+
+- name: Initialize coverage stores in GeoServer (only those that do not exist)
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/coveragestores/{{ item.store_item }}/external.imagemosaic"
+    method: PUT
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    return_content: true
+    headers:
+      Content-Type: "text/plain"
+    body: "{{ geoserver_products_path }}/{{ item.store_item }}"
+    status_code: [200, 201]
+    timeout: 60
+  loop: "{{ gs_store_check.results }}"
+  loop_control:
+    label: "{{ item.store_item }}"
+  when: item.status == 404
+  register: gs_init
+  no_log: true
+
+- name: Verify initialization result
+  ansible.builtin.debug:
+    msg: "Store {{ item.item.store_item }}: HTTP {{ item.status | default('Skipped') }}"
+  loop: "{{ gs_init.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.store_item | default('none') }}"
+  when: item.changed | default(false)
+
+- name: Check if coverages (layers) are already published
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/coveragestores/{{ item }}/coverages/{{ item }}.json"
+    method: GET
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    status_code: [200, 404]
+  loop: "{{ geoserver_stores }}"
+  register: gs_layer_check
+  no_log: true
+
+- name: Seed NDVI directories with dummy image
+  ansible.builtin.copy:
+    src: "dummy_ndvi.tif"
+    dest: "{{ geoserver_products_path }}/{{ item }}/20260601_133943_S2B_MSIL2A_T29TQG_R137_DUMMY_NDVIb.tif"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0664"
+  loop:
+    - s2ndvi
+    - s2ndvi_mosaic
+
+- name: Seed RGB directories with dummy image
+  ansible.builtin.copy:
+    src: "dummy_rgb.tif"
+    dest: "{{ geoserver_products_path }}/{{ item }}/20260601_133943_S2B_MSIL2A_T29TQG_R137_DUMMY_RGB1184.tif"
+    owner: "{{ sys_user }}"
+    group: "{{ sys_group }}"
+    mode: "0664"
+  loop:
+    - s2rgb
+    - s2rgb_mosaic
+
+- name: Publish coverages as Layers in GeoServer
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/coveragestores/{{ item.item }}/coverages"
+    method: POST
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      coverage:
+        name: "{{ item.item }}"
+        nativeName: "{{ item.item }}"
+        title: "Aether {{ item.item | upper }}"
+    status_code: [201]
+  loop: "{{ gs_layer_check.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  ignore_errors: true
+  when: item.status == 404
+
+# --- SLD STYLE MANAGEMENT ---
+- name: Check if the sld_ndvi style exists in the workspace
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/styles/sld_ndvi.json"
+    method: GET
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    status_code: [200, 404]
+  register: check_style_ndvi
+  no_log: true
+
+- name: Upload sld_ndvi style to GeoServer
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/styles?name=sld_ndvi"
+    method: POST
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    headers:
+      Content-Type: "application/vnd.ogc.sld+xml"
+    body: "{{ lookup('file', 'sld_ndvi.sld') }}"
+    status_code: 201
+  when: check_style_ndvi.status == 404
+
+- name: Check if the sld_rgb1184 style exists in the workspace
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/styles/sld_rgb1184.json"
+    method: GET
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    status_code: [200, 404]
+  register: check_style_rgb
+  no_log: true
+
+- name: Upload style sld_rgb1184 to GeoServer
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/styles?name=sld_rgb1184"
+    method: POST
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    headers:
+      Content-Type: "application/vnd.ogc.sld+xml"
+    body: "{{ lookup('file', 'sld_rgb1184.sld') }}"
+    status_code: 201
+  when: check_style_rgb.status == 404
+
+# --- ASSOCIATION OF LAYERED STYLES ---
+- name: Associating the sld_ndvi style with the NDVI layers (Simple and Mosaic)
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/layers/{{ item }}.json"
+    method: PUT
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      layer:
+        defaultStyle:
+          name: "sld_ndvi"
+          workspace: "{{ geoserver_workspace }}"
+    status_code: 200
+  loop:
+    - s2ndvi
+    - s2ndvi_mosaic
+  # Omitimos errores por si la capa aún no ha sido publicada por el pipeline
+  ignore_errors: true
+
+- name: Associate style sld_rgb1184 with RGB layers (Simple and Mosaic)
+  ansible.builtin.uri:
+    url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/layers/{{ item }}.json"
+    method: PUT
+    user: "{{ geoserver_username }}"
+    password: "{{ geoserver_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      layer:
+        defaultStyle:
+          name: "sld_rgb1184"
+          workspace: "{{ geoserver_workspace }}"
+    status_code: 200
+  loop:
+    - s2rgb
+    - s2rgb_mosaic
+  ignore_errors: true

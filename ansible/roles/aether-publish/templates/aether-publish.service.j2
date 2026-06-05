@@ -1,0 +1,12 @@
+[Unit]
+Description=Aether - Product publishing on GeoServer
+After=tomcat9.service
+
+[Service]
+Type=oneshot
+User={{ sys_user }}
+Group={{ sys_group }}
+EnvironmentFile={{ publish_base_dir }}/.env
+ExecStart=/bin/bash {{ publish_base_dir }}/scripts/run_publish.sh
+StandardOutput=journal
+StandardError=journal

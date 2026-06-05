@@ -1,0 +1,28 @@
+[Unit]
+Description=Apache Tomcat 9 - GeoServer Aether
+After=network.target postgresql.service
+
+[Service]
+Type=forking
+PIDFile={{ catalina_pid }}
+User={{ sys_user }}
+Group={{ sys_group }}
+
+Environment=JAVA_HOME={{ java_home }}
+Environment=CATALINA_HOME={{ catalina_home }}
+Environment=CATALINA_BASE={{ catalina_base }}
+Environment=CATALINA_PID={{ catalina_pid }}
+
+ExecStart={{ catalina_home }}/bin/startup.sh
+ExecStop={{ catalina_home }}/bin/shutdown.sh
+
+Restart=on-failure
+RestartSec=10
+
+# Bind mounts of products
+{% for mount in bind_mounts %}
+BindPaths={{ mount.src }}:{{ mount.dst }}
+{% endfor %}
+
+[Install]
+WantedBy=multi-user.target
