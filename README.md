@@ -156,7 +156,7 @@ pip install -r requirements.txt
 
 ```bash
 psql -U postgres -c "CREATE DATABASE aether;"
-psql -U postgres -d aether -f catalog.sql
+psql -U postgres -d aether -f catalog.sql.j2
 ```
 
 ### 4. Configurar variables de entorno
@@ -249,7 +249,7 @@ aether-process [/opt/cdse-api/]
 │       └── s2_processor.py          # Lógica GDAL: create_mosaic / is_mosaic_ready
 │
 ├── db/
-│   └── catalog.sql                  # DDL schema: tablas, índices, FKs, datos
+│   └── catalog.sql.j2                  # DDL schema: tablas, índices, FKs, datos
 │
 ├── scripts/
 │   ├── run_api.sh                   # Arranca uvicorn en el entorno Conda
