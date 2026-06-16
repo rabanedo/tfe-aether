@@ -1,4 +1,4 @@
-# Aether Ansible - Despliegue automatizado de la plataforma
+# Aether Ansible — Despliegue automatizado de la plataforma
 
 Playbooks de Ansible para el despliegue completo de la plataforma **Aether** en sus dos nodos:
 
@@ -9,53 +9,53 @@ Playbooks de Ansible para el despliegue completo de la plataforma **Aether** en 
 
 ## Estructura
 
-```text
-aether-ansible/
-├── playbook.yml                        Playbook principal de despliegue
-├── ansible.cfg                         Configuración del motor de Ansible
+```
+ansible/
+├── playbook.yml                         # Playbook principal de despliegue
+├── ansible.cfg                          # Configuración del motor de Ansible
 ├── .gitignore
 │
 ├── global_vars/
-│   ├── applications.yml                Variables globales no sensibles
-│   └── applications_encrypted.yml      Variables sensibles (cifrar con Vault)
+│   ├── applications.yml                 # Variables globales no sensibles
+│   └── applications_encrypted.yml       # Variables sensibles (cifradas con Vault)
 │
 ├── environments/
 │   ├── development/
-│   │   ├── hosts.ini                   Inventario de desarrollo
+│   │   ├── hosts.ini                    # Inventario de desarrollo
 │   │   ├── group_vars/all/
-│   │   │   └── environment.yml         Nombre del entorno
+│   │   │   └── environment.yml          # Nombre del entorno
 │   │   └── host_vars/
 │   │       ├── aether-process/
-│   │       │   ├── applications.yml    Paquetes, rutas, parámetros Nodo 1
-│   │       │   └── postgres.yml        Configuración PostgreSQL Nodo 1
+│   │       │   ├── applications.yml     # Paquetes, rutas, parámetros Nodo 1
+│   │       │   └── postgres.yml         # Configuración PostgreSQL Nodo 1
 │   │       └── aether-publish/
-│   │           ├── applications.yml    Paquetes, bind mounts Nodo 2
-│   │           ├── postgres.yml        Configuración PostgreSQL Nodo 2
-│   │           └── tomcat.yml          Parámetros JVM y Catalina
-│   └── production/                     Misma estructura que development
+│   │           ├── applications.yml     # Paquetes, bind mounts Nodo 2
+│   │           ├── postgres.yml         # Configuración PostgreSQL Nodo 2
+│   │           └── tomcat.yml           # Parámetros JVM y Catalina
+│   └── production/                      # Misma estructura que development
 │
 └── roles/
-    ├── system-update/                  Actualización del sistema y paquetes base
-    ├── system-config/                  Usuarios, directorios, logrotate
-    ├── nfs-setup/                      Configuración de servidor y cliente NFSv4
-    ├── postgres/                       PostgreSQL 18 + PostGIS (ambos nodos)
-    ├── conda/                          Miniconda + GDAL/PROJ/GEOS (Nodo 1)
-    ├── aether-api/                     FastAPI + systemd pipeline (Nodo 1)
-    ├── tomcat/                         Apache Tomcat 9 (Nodo 2)
-    ├── tomcat-config/                  Usuarios manager, bind mounts
-    ├── geoserver/                      GeoServer 2.28 + extensiones (Nodo 2)
-    ├── geoserver-config/               Workspace, coveragestores, ImageMosaics
-    └── aether-publish/                 Orquestación de sincronización (Nodo 2)
+    ├── system-update/                   # Actualización del sistema y paquetes base
+    ├── system-config/                   # Usuarios, directorios, logrotate
+    ├── nfs-setup/                       # Configuración servidor y cliente NFSv4
+    ├── postgres/                        # PostgreSQL 18 + PostGIS (ambos nodos)
+    ├── conda/                           # Miniconda + GDAL/PROJ/GEOS (Nodo 1)
+    ├── aether-api/                      # FastAPI + systemd pipeline (Nodo 1)
+    ├── tomcat/                          # Apache Tomcat 9 (Nodo 2)
+    ├── tomcat-config/                   # Usuarios manager, bind mounts
+    ├── geoserver/                       # GeoServer 2.28 + extensiones (Nodo 2)
+    ├── geoserver-config/                # Workspace, coveragestores, ImageMosaics
+    └── aether-publish/                  # Script de publicación y timer (Nodo 2)
 ```
 
 ---
 
 ## Variables
 
-### `global_vars/applications.yml` - Variables globales no sensibles
+### `global_vars/applications.yml` — Variables globales no sensibles
 
 | Variable | Descripción |
-|---|---|
+|----------|-------------|
 | `sys_user` / `sys_group` | Usuario y grupo del sistema para ambos nodos |
 | `logs_path` | Ruta de logs (`/var/log/aether`) |
 | `rotate_path` | Directorio de configuración de logrotate |
@@ -77,10 +77,10 @@ aether-ansible/
 | `publish_base_dir` | Directorio base del Nodo 2 (`/opt/aether-publish`) |
 | `publish_products_dir` | Directorio de productos GeoServer (`/dwh/data`) |
 
-### `global_vars/applications_encrypted.yml` - Variables sensibles (Vault)
+### `global_vars/applications_encrypted.yml` — Variables sensibles (Vault)
 
 | Variable | Descripción |
-|---|---|
+|----------|-------------|
 | `catalog_database` | Nombre de la BD del catálogo |
 | `catalog_host` | Host de PostgreSQL Nodo 1 |
 | `catalog_port` | Puerto de PostgreSQL |
@@ -100,22 +100,22 @@ aether-ansible/
 ### `environments/<env>/host_vars/aether-process/`
 
 | Fichero | Variable | Descripción |
-|---|---|---|
+|---------|----------|-------------|
 | `applications.yml` | `apt_packages` | Paquetes del sistema |
 | `applications.yml` | `s2_process_command` | Ejecutable Python del entorno Conda |
 | `applications.yml` | `s2_process_params` | Productos a generar (`RGB1184 NDVIb`) |
 | `applications.yml` | `s2_output_path` | Ruta de salida de productos derivados |
-| `postgres.yml` | `install_postgres` | Bool - instalar PostgreSQL en este nodo |
+| `postgres.yml` | `install_postgres` | Bool — instalar PostgreSQL en este nodo |
 | `postgres.yml` | `db_name` | Nombre de la BD |
 | `postgres.yml` | `sql_schema_file` | Ruta al fichero SQL de esquema |
 
 ### `environments/<env>/host_vars/aether-publish/`
 
 | Fichero | Variable | Descripción |
-|---|---|---|
+|---------|----------|-------------|
 | `applications.yml` | `apt_packages` | Paquetes del sistema |
 | `applications.yml` | `bind_mounts` | Lista de bind mounts src→dst |
-| `postgres.yml` | `install_postgres` | Bool - instalar PostgreSQL en este nodo |
+| `postgres.yml` | `install_postgres` | Bool — instalar PostgreSQL en este nodo |
 | `postgres.yml` | `sql_schema_file` | Ruta al SQL del esquema GeoServer |
 | `tomcat.yml` | `catalina_home` / `catalina_base` | Rutas de Catalina |
 | `tomcat.yml` | `xms` / `xmx` | Heap JVM inicial y máximo |
@@ -128,8 +128,8 @@ aether-ansible/
 # En el nodo de control (máquina orquestadora)
 pip install ansible
 
-# Verificar versión
-ansible --version   # >= 2.15 recomendado
+# Verificar versión (>= 2.15 recomendado)
+ansible --version
 
 # Establecer confianza SSH sin contraseña hacia los nodos destino
 ssh-copy-id <usuario>@<IP_NODO1>
@@ -142,7 +142,7 @@ ssh-copy-id <usuario>@<IP_NODO2>
 
 ### 1. Ajustar el inventario
 
-Edita `environments/production/hosts.ini` con las IPs y credenciales reales de tu entorno:
+Edita `environments/production/hosts.ini` con las IPs y credenciales reales:
 
 ```ini
 [aether_process]
@@ -154,8 +154,7 @@ aether-publish ansible_host=192.168.1.222 ansible_user=ubuntu
 
 ### 2. Configurar variables del entorno
 
-Edita los ficheros en `environments/production/host_vars/` con las rutas
-y parámetros específicos de tu instalación.
+Edita los ficheros en `environments/production/host_vars/` con las rutas y parámetros específicos de tu instalación.
 
 ### 3. Configurar y cifrar los secretos
 
@@ -163,18 +162,17 @@ Copia la plantilla de variables sensibles y rellena los valores reales:
 
 ```bash
 cp global_vars/applications_encrypted.yml global_vars/applications_encrypted.yml.bak
-nano global_vars/applications_encrypted.yml   # rellenar CHANGEME_*
+nano global_vars/applications_encrypted.yml
 ```
 
-Cifrar con Ansible Vault:
+Cifra el fichero con Ansible Vault:
 
 ```bash
 ansible-vault encrypt global_vars/applications_encrypted.yml
 # Introduce y confirma la contraseña del vault
 ```
 
-Para no tener que introducir la contraseña en cada ejecución, guárdala
-en un fichero (excluido del repositorio por `.gitignore`):
+Para no introducir la contraseña en cada ejecución, guárdala en un fichero local (excluido del repositorio por `.gitignore`):
 
 ```bash
 echo "mi_contraseña_vault" > .vault_pass
@@ -200,7 +198,7 @@ ansible-playbook playbook.yml \
 ansible-playbook playbook.yml -i environments/production/hosts.ini \
   --vault-password-file .vault_pass --tags system-update
 
-# Solo Nodo 1 completo
+# Solo Nodo 1 completo (Conda + API)
 ansible-playbook playbook.yml -i environments/production/hosts.ini \
   --vault-password-file .vault_pass --tags "conda,aether-api"
 
@@ -233,9 +231,10 @@ ansible all -i environments/production/hosts.ini -m ping
 ## Tags disponibles
 
 | Tag | Roles ejecutados | Nodo(s) |
-|---|---|---|
+|-----|------------------|---------|
 | `system-update` | system-update | Ambos |
 | `system-config` | system-config | Ambos |
+| `nfs-setup` | nfs-setup | Ambos |
 | `postgres` | postgres | Ambos |
 | `conda` | conda | aether-process |
 | `aether-api` | conda, aether-api | aether-process |
@@ -245,7 +244,7 @@ ansible all -i environments/production/hosts.ini -m ping
 
 ---
 
-## Variables cifradas - Gestión del vault
+## Gestión del vault
 
 ```bash
 # Ver contenido cifrado
@@ -265,10 +264,10 @@ ansible-vault decrypt global_vars/applications_encrypted.yml
 
 ## Stack desplegado
 
-### Nodo 1 - aether-process
+### Nodo 1 — aether-process
 
 | Componente | Versión |
-|---|---|
+|------------|---------|
 | Ubuntu | 26.04 LTS |
 | Python (Conda) | 3.11 |
 | FastAPI | 0.136.1 |
@@ -280,14 +279,14 @@ ansible-vault decrypt global_vars/applications_encrypted.yml
 | GDAL / PROJ / GEOS | conda-forge latest |
 | PostgreSQL + PostGIS | 18 |
 
-### Nodo 2 - aether-publish
+### Nodo 2 — aether-publish
 
-| Componente | Versión   |
-|---|-----------|
+| Componente | Versión |
+|------------|---------|
 | Ubuntu | 26.04 LTS |
-| Python (sistema) | 3.12      |
-| python3-requests | sistema   |
-| OpenJDK | 17        |
-| Apache Tomcat | 9.0.118    |
-| GeoServer | 2.28.4    |
-| PostgreSQL + PostGIS | 18        |
+| Python (sistema) | 3.12 |
+| python3-requests | sistema |
+| OpenJDK | 17 |
+| Apache Tomcat | 9.0.118 |
+| GeoServer | 2.28.4 |
+| PostgreSQL + PostGIS | 18 |
