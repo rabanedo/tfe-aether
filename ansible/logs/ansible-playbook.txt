@@ -1,0 +1,716 @@
+rra-unir-tfe@aether-publish:~/ansible$ ansible-playbook playbook.yml -i environments/development/hosts.ini
+
+PLAY [Update system] *********************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************************************
+viernes 12 junio 2026  12:56:26 +0200 (0:00:00.013)       0:00:00.013 *********
+ok: [aether-publish]
+ok: [aether-process]
+
+TASK [system-update : Refresh cache if last was more than 3600 seconds ago] **************************************************************************************************************************
+viernes 12 junio 2026  12:56:45 +0200 (0:00:19.194)       0:00:19.207 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [system-update : Update all system packages] ****************************************************************************************************************************************************
+viernes 12 junio 2026  12:56:50 +0200 (0:00:04.335)       0:00:23.543 *********
+ok: [aether-process]
+ok: [aether-publish]
+
+TASK [system-update : Install the latest version of the necessary packages] **************************************************************************************************************************
+viernes 12 junio 2026  12:56:51 +0200 (0:00:01.210)       0:00:24.753 *********
+changed: [aether-publish]
+changed: [aether-process]
+
+TASK [system-update : Check if the system requires a restart] ****************************************************************************************************************************************
+viernes 12 junio 2026  12:57:15 +0200 (0:00:23.661)       0:00:48.414 *********
+ok: [aether-process]
+ok: [aether-publish]
+
+TASK [system-update : Restart the server if necessary] ***********************************************************************************************************************************************
+viernes 12 junio 2026  12:57:15 +0200 (0:00:00.373)       0:00:48.788 *********
+skipping: [aether-process]
+skipping: [aether-publish]
+
+PLAY [Configure servers] *****************************************************************************************************************************************************************************
+
+TASK [system-config : Create aether system group] ****************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:15 +0200 (0:00:00.031)       0:00:48.819 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [system-config : Create aether system user] *****************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:15 +0200 (0:00:00.419)       0:00:49.239 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [system-config : Create logs directory] *********************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:16 +0200 (0:00:00.547)       0:00:49.786 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [system-config : Configure logrotate for aether logs] *******************************************************************************************************************************************
+viernes 12 junio 2026  12:57:16 +0200 (0:00:00.371)       0:00:50.158 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+PLAY [NFS Setup] *************************************************************************************************************************************************************************************
+
+TASK [nfs-setup : Run NFS Server (Publish) tasks] ****************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:17 +0200 (0:00:00.760)       0:00:50.918 *********
+skipping: [aether-process]
+included: /home/rra-unir-tfe/ansible/roles/nfs-setup/tasks/server.yml for aether-publish
+
+TASK [nfs-setup : Install NFS server packages] *******************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:17 +0200 (0:00:00.033)       0:00:50.952 *********
+ok: [aether-publish]
+
+TASK [nfs-setup : Create export directory (Server)] **************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:18 +0200 (0:00:01.351)       0:00:52.303 *********
+changed: [aether-publish]
+
+TASK [nfs-setup : Configure /etc/exports to allow client access] *************************************************************************************************************************************
+viernes 12 junio 2026  12:57:19 +0200 (0:00:00.241)       0:00:52.544 *********
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+changed: [aether-publish]
+
+TASK [nfs-setup : Forzar el reinicio del servidor NFS antes de que el cliente se conecte] ************************************************************************************************************
+viernes 12 junio 2026  12:57:19 +0200 (0:00:00.296)       0:00:52.841 *********
+
+RUNNING HANDLER [nfs-setup : Restart NFS Server] *****************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:19 +0200 (0:00:00.004)       0:00:52.845 *********
+changed: [aether-publish]
+
+TASK [nfs-setup : Execute NFS Client tasks (Process)] ************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:20 +0200 (0:00:00.793)       0:00:53.639 *********
+skipping: [aether-publish]
+included: /home/rra-unir-tfe/ansible/roles/nfs-setup/tasks/client.yml for aether-process
+
+TASK [nfs-setup : Install NFS client utilities] ******************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:20 +0200 (0:00:00.028)       0:00:53.667 *********
+ok: [aether-process]
+
+TASK [nfs-setup : Create assembly point (Customer)] **************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:21 +0200 (0:00:01.211)       0:00:54.879 *********
+ok: [aether-process]
+
+TASK [nfs-setup : Mount NFS volume and register in /etc/fstab] ***************************************************************************************************************************************
+viernes 12 junio 2026  12:57:21 +0200 (0:00:00.263)       0:00:55.142 *********
+[WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+[DEPRECATION WARNING]: Importing 'to_bytes' from 'ansible.module_utils._text' is deprecated. This feature will be removed from ansible-core version 2.24. Use ansible.module_utils.common.text.converters instead.
+[DEPRECATION WARNING]: Importing 'to_native' from 'ansible.module_utils._text' is deprecated. This feature will be removed from ansible-core version 2.24. Use ansible.module_utils.common.text.converters instead.
+[DEPRECATION WARNING]: Passing `warnings` to `exit_json` or `fail_json` is deprecated. This feature will be removed from ansible-core version 2.23. Use `AnsibleModule.warn` instead.
+changed: [aether-process]
+
+PLAY [Install and configure PostgreSQL] **************************************************************************************************************************************************************
+
+TASK [postgres : Create temporary directory] *********************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:22 +0200 (0:00:00.368)       0:00:55.512 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Install PostgreSQL pre-dependencies] ************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:22 +0200 (0:00:00.245)       0:00:55.758 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Ensure that the keyrings directory exists] ******************************************************************************************************************************************
+viernes 12 junio 2026  12:57:26 +0200 (0:00:04.461)       0:01:00.219 *********
+ok: [aether-process]
+ok: [aether-publish]
+
+TASK [postgres : Download PostgreSQL GPG key] ********************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:27 +0200 (0:00:00.256)       0:01:00.476 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Add PGDG repository with signed-by] *************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:28 +0200 (0:00:01.328)       0:01:01.805 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Install PostgreSQL 18 and PostGIS] **************************************************************************************************************************************************
+viernes 12 junio 2026  12:57:38 +0200 (0:00:09.786)       0:01:11.592 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Ensure that PostgreSQL is started and enabled] **************************************************************************************************************************************
+viernes 12 junio 2026  12:58:13 +0200 (0:00:35.235)       0:01:46.827 *********
+ok: [aether-process]
+ok: [aether-publish]
+
+TASK [postgres : Create database] ********************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:13 +0200 (0:00:00.391)       0:01:47.218 *********
+[WARNING]: Module remote_tmp /var/lib/postgresql/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Activate PostGIS extension] *********************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:14 +0200 (0:00:00.503)       0:01:47.722 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Create database user] ***************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:15 +0200 (0:00:00.863)       0:01:48.585 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Deploy SQL schema template] *********************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:15 +0200 (0:00:00.432)       0:01:49.017 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Load SQL schema] ********************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:16 +0200 (0:00:00.687)       0:01:49.705 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Grant usage and create permission on the schema to the user] ************************************************************************************************************************
+viernes 12 junio 2026  12:58:16 +0200 (0:00:00.446)       0:01:50.151 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Grant permissions on all tables in the schema] **************************************************************************************************************************************
+viernes 12 junio 2026  12:58:17 +0200 (0:00:00.411)       0:01:50.562 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Grant permissions on all sequences in the scheme] ***********************************************************************************************************************************
+viernes 12 junio 2026  12:58:17 +0200 (0:00:00.343)       0:01:50.906 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Configure pg_hba.conf] **************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:17 +0200 (0:00:00.327)       0:01:51.233 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+TASK [postgres : Clean up temporary directory] *******************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:18 +0200 (0:00:00.712)       0:01:51.946 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+RUNNING HANDLER [postgres : Reload PostgreSQL] *******************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:18 +0200 (0:00:00.266)       0:01:52.212 *********
+changed: [aether-process]
+changed: [aether-publish]
+
+PLAY [Install and configure Conda] *******************************************************************************************************************************************************************
+
+TASK [conda : Create temporary directory] ************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:19 +0200 (0:00:00.492)       0:01:52.705 *********
+changed: [aether-process]
+
+TASK [conda : Check if Miniconda is already installed] ***********************************************************************************************************************************************
+viernes 12 junio 2026  12:58:19 +0200 (0:00:00.243)       0:01:52.949 *********
+ok: [aether-process]
+
+TASK [conda : Download Miniconda installer] **********************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:19 +0200 (0:00:00.218)       0:01:53.167 *********
+changed: [aether-process]
+
+TASK [conda : Install Miniconda] *********************************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:22 +0200 (0:00:03.035)       0:01:56.203 *********
+changed: [aether-process]
+
+TASK [conda : Apply conda dependency file template] **************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:35 +0200 (0:00:12.161)       0:02:08.364 *********
+changed: [aether-process]
+
+TASK [conda : Accept Miniconda's terms of service] ***************************************************************************************************************************************************
+viernes 12 junio 2026  12:58:35 +0200 (0:00:00.729)       0:02:09.094 *********
+ok: [aether-process] => (item=https://repo.anaconda.com/pkgs/main)
+ok: [aether-process] => (item=https://repo.anaconda.com/pkgs/r)
+
+TASK [conda : Synchronize conda environment (Create or Update)] **************************************************************************************************************************************
+viernes 12 junio 2026  12:58:38 +0200 (0:00:02.499)       0:02:11.593 *********
+ok: [aether-process]
+
+TASK [conda : Initialize Miniconda in the user's .bashrc] ********************************************************************************************************************************************
+viernes 12 junio 2026  12:59:21 +0200 (0:00:42.749)       0:02:54.343 *********
+[WARNING]: Module remote_tmp /home/aether/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+ok: [aether-process]
+
+TASK [conda : Automatically activate the cdse-api environment upon login] ****************************************************************************************************************************
+viernes 12 junio 2026  12:59:21 +0200 (0:00:00.691)       0:02:55.034 *********
+changed: [aether-process]
+
+TASK [conda : Clean up temporary directory] **********************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:21 +0200 (0:00:00.230)       0:02:55.264 *********
+changed: [aether-process]
+
+PLAY [Deploy Aether API (Node 1)] ********************************************************************************************************************************************************************
+
+TASK [aether-api : Create temporary directory] *******************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:22 +0200 (0:00:00.245)       0:02:55.510 *********
+changed: [aether-process]
+
+TASK [aether-api : Create API directory] *************************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:22 +0200 (0:00:00.226)       0:02:55.737 *********
+changed: [aether-process]
+
+TASK [aether-api : Ensure that git is installed] *****************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:22 +0200 (0:00:00.213)       0:02:55.950 *********
+ok: [aether-process]
+
+TASK [aether-api : Clone the official aether repository] *********************************************************************************************************************************************
+viernes 12 junio 2026  12:59:23 +0200 (0:00:00.884)       0:02:56.835 *********
+changed: [aether-process]
+[DEPRECATION WARNING]: Importing 'to_text' from 'ansible.module_utils._text' is deprecated. This feature will be removed from ansible-core version 2.24. Use ansible.module_utils.common.text.converters instead.
+[DEPRECATION WARNING]: The `ansible.module_utils.common._collections_compat` module is deprecated. This feature will be removed from ansible-core version 2.24. Use `collections.abc` from the Python standard library instead.
+
+TASK [aether-api : Synchronize the aether-process folder to the API base directory] ******************************************************************************************************************
+viernes 12 junio 2026  12:59:26 +0200 (0:00:02.853)       0:02:59.689 *********
+changed: [aether-process]
+
+TASK [aether-api : Ensure correct permissions and ownership in the API directory] ********************************************************************************************************************
+viernes 12 junio 2026  12:59:26 +0200 (0:00:00.371)       0:03:00.060 *********
+ok: [aether-process]
+
+TASK [aether-api : Make shell scripts executable] ****************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:26 +0200 (0:00:00.221)       0:03:00.281 *********
+changed: [aether-process] => (item=run_api.sh)
+changed: [aether-process] => (item=run_jobs.sh)
+changed: [aether-process] => (item=run_rgb_ndvi.sh)
+
+TASK [aether-api : Make python scripts executable] ***************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:27 +0200 (0:00:00.610)       0:03:00.891 *********
+changed: [aether-process] => (item=rgb_ndvi.py)
+changed: [aether-process] => (item=s2_processor.py)
+
+TASK [aether-api : Generate config.txt with vault variables] *****************************************************************************************************************************************
+viernes 12 junio 2026  12:59:27 +0200 (0:00:00.421)       0:03:01.313 *********
+changed: [aether-process]
+
+TASK [aether-api : Generate .env environment file] ***************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:28 +0200 (0:00:00.592)       0:03:01.906 *********
+changed: [aether-process]
+
+TASK [aether-api : Create workspace data directories] ************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:29 +0200 (0:00:00.522)       0:03:02.428 *********
+changed: [aether-process] => (item=/dwh/products/S2/derived_products/NDVIb)
+changed: [aether-process] => (item=/dwh/products/S2/derived_products/RGB1184)
+changed: [aether-process] => (item=/dwh/products/S2/derived_products/NDVIb_mosaic)
+changed: [aether-process] => (item=/dwh/products/S2/derived_products/RGB1184_mosaic)
+changed: [aether-process] => (item=/dwh/products/S2/original_products)
+changed: [aether-process] => (item=/dwh/tmp)
+
+TASK [aether-api : Install unit cdse-api.service] ****************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:30 +0200 (0:00:01.255)       0:03:03.683 *********
+changed: [aether-process]
+
+TASK [aether-api : Install unit cdse-pipeline.service] ***********************************************************************************************************************************************
+viernes 12 junio 2026  12:59:30 +0200 (0:00:00.534)       0:03:04.218 *********
+changed: [aether-process]
+
+TASK [aether-api : Install unit cdse-pipeline.timer] *************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:31 +0200 (0:00:00.530)       0:03:04.748 *********
+changed: [aether-process]
+
+TASK [aether-api : Ensure that cdse-api.service is enabled and started] ******************************************************************************************************************************
+viernes 12 junio 2026  12:59:31 +0200 (0:00:00.513)       0:03:05.261 *********
+changed: [aether-process]
+
+TASK [aether-api : Ensure that cdse-pipeline.timer is enabled and started] ***************************************************************************************************************************
+viernes 12 junio 2026  12:59:32 +0200 (0:00:01.000)       0:03:06.262 *********
+changed: [aether-process]
+
+TASK [aether-api : Clean up temporary directory] *****************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:33 +0200 (0:00:00.702)       0:03:06.965 *********
+changed: [aether-process]
+
+RUNNING HANDLER [aether-api : Reload systemd] ********************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:33 +0200 (0:00:00.230)       0:03:07.195 *********
+ok: [aether-process]
+
+PLAY [Install Tomcat] ********************************************************************************************************************************************************************************
+
+TASK [tomcat : Create temporary directory] ***********************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:34 +0200 (0:00:00.547)       0:03:07.742 *********
+changed: [aether-publish]
+
+TASK [tomcat : Install OpenJDK 17] *******************************************************************************************************************************************************************
+viernes 12 junio 2026  12:59:35 +0200 (0:00:00.684)       0:03:08.427 *********
+changed: [aether-publish]
+
+TASK [tomcat : Check if Tomcat is already installed] *************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:06 +0200 (0:00:31.814)       0:03:40.241 *********
+ok: [aether-publish]
+
+TASK [tomcat : Download Tomcat 9.0.118] **************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:07 +0200 (0:00:00.260)       0:03:40.501 *********
+changed: [aether-publish]
+
+TASK [tomcat : Unpacking Tomcat] *********************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:23 +0200 (0:00:16.398)       0:03:56.899 *********
+changed: [aether-publish]
+
+TASK [tomcat : Create a symbolic link from /opt/tomcat9 to the live version] *************************************************************************************************************************
+viernes 12 junio 2026  13:00:24 +0200 (0:00:01.064)       0:03:57.964 *********
+changed: [aether-publish]
+
+TASK [tomcat : Adjust Tomcat directory owner and permissions] ****************************************************************************************************************************************
+viernes 12 junio 2026  13:00:24 +0200 (0:00:00.252)       0:03:58.216 *********
+changed: [aether-publish]
+
+TASK [tomcat : Create GeoServer data directory] ******************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:25 +0200 (0:00:00.274)       0:03:58.490 *********
+changed: [aether-publish]
+
+TASK [tomcat : Install setenv.sh] ********************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:25 +0200 (0:00:00.229)       0:03:58.720 *********
+changed: [aether-publish]
+
+TASK [tomcat : Install unit systemd from Tomcat] *****************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:25 +0200 (0:00:00.528)       0:03:59.248 *********
+changed: [aether-publish]
+
+TASK [tomcat : Enable and start Tomcat] **************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:26 +0200 (0:00:00.519)       0:03:59.768 *********
+changed: [aether-publish]
+
+TASK [tomcat : Clean up temporary directory] *********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:27 +0200 (0:00:00.904)       0:04:00.672 *********
+changed: [aether-publish]
+
+RUNNING HANDLER [tomcat : Restart Tomcat] ************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:27 +0200 (0:00:00.270)       0:04:00.943 *********
+changed: [aether-publish]
+
+PLAY [Configure Tomcat] ******************************************************************************************************************************************************************************
+
+TASK [tomcat-config : Configure Tomcat Manager users (tomcat-users.xml)] *****************************************************************************************************************************
+viernes 12 junio 2026  13:00:30 +0200 (0:00:02.884)       0:04:03.828 *********
+changed: [aether-publish]
+
+RUNNING HANDLER [tomcat-config : Restart Tomcat] *****************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:31 +0200 (0:00:00.761)       0:04:04.589 *********
+changed: [aether-publish]
+
+PLAY [Install and configure GeoServer] ***************************************************************************************************************************************************************
+
+TASK [geoserver : Create temporary directory] ********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:33 +0200 (0:00:02.181)       0:04:06.771 *********
+changed: [aether-publish]
+
+TASK [geoserver : Check if GeoServer is already deployed] ********************************************************************************************************************************************
+viernes 12 junio 2026  13:00:33 +0200 (0:00:00.316)       0:04:07.087 *********
+ok: [aether-publish]
+
+TASK [geoserver : Download GeoServer WAR 2.28.4] *****************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:34 +0200 (0:00:00.314)       0:04:07.401 *********
+changed: [aether-publish]
+
+TASK [geoserver : Ensure destination directory exists for GeoServer extraction] **********************************************************************************************************************
+viernes 12 junio 2026  13:00:41 +0200 (0:00:07.308)       0:04:14.709 *********
+changed: [aether-publish]
+
+TASK [geoserver : Unpack GeoServer WAR] **************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:41 +0200 (0:00:00.244)       0:04:14.954 *********
+changed: [aether-publish]
+
+TASK [geoserver : Copy WAR to Tomcat webapps] ********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:42 +0200 (0:00:01.150)       0:04:16.104 *********
+changed: [aether-publish]
+
+TASK [geoserver : Wait for Tomcat to deploy the WAR (max 60s)] ***************************************************************************************************************************************
+viernes 12 junio 2026  13:00:43 +0200 (0:00:01.077)       0:04:17.182 *********
+ok: [aether-publish]
+
+TASK [geoserver : Install GeoServer extensions] ******************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:45 +0200 (0:00:01.339)       0:04:18.521 *********
+included: /home/rra-unir-tfe/ansible/roles/geoserver/tasks/install_extension.yml for aether-publish => (item=pyramid)
+included: /home/rra-unir-tfe/ansible/roles/geoserver/tasks/install_extension.yml for aether-publish => (item=gdal)
+included: /home/rra-unir-tfe/ansible/roles/geoserver/tasks/install_extension.yml for aether-publish => (item=css)
+
+TASK [geoserver : Download extension pyramid] ********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:45 +0200 (0:00:00.053)       0:04:18.575 *********
+changed: [aether-publish]
+
+TASK [geoserver : Extract extension pyramid] *********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:47 +0200 (0:00:02.374)       0:04:20.949 *********
+changed: [aether-publish]
+
+TASK [geoserver : Set owner of JARs of pyramid] ******************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:48 +0200 (0:00:01.123)       0:04:22.072 *********
+changed: [aether-publish]
+
+TASK [geoserver : Remove zip file from the pyramid extension] ****************************************************************************************************************************************
+viernes 12 junio 2026  13:00:49 +0200 (0:00:00.343)       0:04:22.416 *********
+changed: [aether-publish]
+
+TASK [geoserver : Download extension gdal] ***********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:49 +0200 (0:00:00.495)       0:04:22.911 *********
+changed: [aether-publish]
+
+TASK [geoserver : Extract extension gdal] ************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:52 +0200 (0:00:02.629)       0:04:25.540 *********
+changed: [aether-publish]
+
+TASK [geoserver : Set owner of JARs of gdal] *********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:53 +0200 (0:00:01.301)       0:04:26.841 *********
+changed: [aether-publish]
+
+TASK [geoserver : Remove zip file from the gdal extension] *******************************************************************************************************************************************
+viernes 12 junio 2026  13:00:53 +0200 (0:00:00.359)       0:04:27.201 *********
+changed: [aether-publish]
+
+TASK [geoserver : Download extension css] ************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:54 +0200 (0:00:00.312)       0:04:27.514 *********
+changed: [aether-publish]
+
+TASK [geoserver : Extract extension css] *************************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:56 +0200 (0:00:02.510)       0:04:30.024 *********
+changed: [aether-publish]
+
+TASK [geoserver : Set owner of JARs of css] **********************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:57 +0200 (0:00:01.249)       0:04:31.274 *********
+changed: [aether-publish]
+
+TASK [geoserver : Remove zip file from the css extension] ********************************************************************************************************************************************
+viernes 12 junio 2026  13:00:58 +0200 (0:00:00.516)       0:04:31.790 *********
+changed: [aether-publish]
+
+TASK [geoserver : Move data directory out of WAR] ****************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:58 +0200 (0:00:00.340)       0:04:32.131 *********
+ok: [aether-publish]
+
+TASK [geoserver : Clean up temporary directory] ******************************************************************************************************************************************************
+viernes 12 junio 2026  13:00:59 +0200 (0:00:00.414)       0:04:32.546 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Wait for GeoServer to start up] *********************************************************************************************************************************************
+viernes 12 junio 2026  13:00:59 +0200 (0:00:00.381)       0:04:32.927 *********
+FAILED - RETRYING: [aether-publish]: Wait for GeoServer to start up (18 retries left).
+ok: [aether-publish]
+
+TASK [geoserver-config : Create aether Workspace] ****************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:12 +0200 (0:00:12.529)       0:04:45.457 *********
+ok: [aether-publish]
+
+TASK [geoserver-config : Create mount directories for ImageMosaic] ***********************************************************************************************************************************
+viernes 12 junio 2026  13:01:12 +0200 (0:00:00.535)       0:04:45.992 *********
+changed: [aether-publish] => (item=s2ndvi)
+changed: [aether-publish] => (item=s2rgb)
+changed: [aether-publish] => (item=s2ndvi_mosaic)
+changed: [aether-publish] => (item=s2rgb_mosaic)
+
+TASK [geoserver-config : Create ImageMosaic configuration files in each store] ***********************************************************************************************************************
+viernes 12 junio 2026  13:01:13 +0200 (0:00:00.906)       0:04:46.899 *********
+included: /home/rra-unir-tfe/ansible/roles/geoserver-config/tasks/configure_store.yml for aether-publish => (item=s2ndvi)
+included: /home/rra-unir-tfe/ansible/roles/geoserver-config/tasks/configure_store.yml for aether-publish => (item=s2rgb)
+included: /home/rra-unir-tfe/ansible/roles/geoserver-config/tasks/configure_store.yml for aether-publish => (item=s2ndvi_mosaic)
+included: /home/rra-unir-tfe/ansible/roles/geoserver-config/tasks/configure_store.yml for aether-publish => (item=s2rgb_mosaic)
+
+TASK [geoserver-config : Create datastore.properties for s2ndvi] *************************************************************************************************************************************
+viernes 12 junio 2026  13:01:13 +0200 (0:00:00.041)       0:04:46.941 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create indexer.properties for s2ndvi] ***************************************************************************************************************************************
+viernes 12 junio 2026  13:01:14 +0200 (0:00:00.563)       0:04:47.505 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create timeregex.properties for s2ndvi] *************************************************************************************************************************************
+viernes 12 junio 2026  13:01:14 +0200 (0:00:00.568)       0:04:48.073 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create datastore.properties for s2rgb] **************************************************************************************************************************************
+viernes 12 junio 2026  13:01:15 +0200 (0:00:00.561)       0:04:48.635 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create indexer.properties for s2rgb] ****************************************************************************************************************************************
+viernes 12 junio 2026  13:01:15 +0200 (0:00:00.551)       0:04:49.186 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create timeregex.properties for s2rgb] **************************************************************************************************************************************
+viernes 12 junio 2026  13:01:16 +0200 (0:00:00.551)       0:04:49.738 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create datastore.properties for s2ndvi_mosaic] ******************************************************************************************************************************
+viernes 12 junio 2026  13:01:16 +0200 (0:00:00.544)       0:04:50.282 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create indexer.properties for s2ndvi_mosaic] ********************************************************************************************************************************
+viernes 12 junio 2026  13:01:17 +0200 (0:00:00.554)       0:04:50.837 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create timeregex.properties for s2ndvi_mosaic] ******************************************************************************************************************************
+viernes 12 junio 2026  13:01:18 +0200 (0:00:00.515)       0:04:51.353 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create datastore.properties for s2rgb_mosaic] *******************************************************************************************************************************
+viernes 12 junio 2026  13:01:18 +0200 (0:00:00.553)       0:04:51.907 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create indexer.properties for s2rgb_mosaic] *********************************************************************************************************************************
+viernes 12 junio 2026  13:01:19 +0200 (0:00:00.546)       0:04:52.453 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Create timeregex.properties for s2rgb_mosaic] *******************************************************************************************************************************
+viernes 12 junio 2026  13:01:19 +0200 (0:00:00.578)       0:04:53.032 *********
+changed: [aether-publish]
+
+TASK [geoserver-config : Check if coverage stores already exist in GeoServer] ************************************************************************************************************************
+viernes 12 junio 2026  13:01:20 +0200 (0:00:00.526)       0:04:53.558 *********
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+
+TASK [geoserver-config : Remove obsolete index tables (if store does not exist in GeoServer)] ********************************************************************************************************
+viernes 12 junio 2026  13:01:21 +0200 (0:00:01.487)       0:04:55.046 *********
+changed: [aether-publish] => (item=(censored due to no_log))
+changed: [aether-publish] => (item=(censored due to no_log))
+changed: [aether-publish] => (item=(censored due to no_log))
+changed: [aether-publish] => (item=(censored due to no_log))
+
+TASK [geoserver-config : Initialize coverage stores in GeoServer (only those that do not exist)] *****************************************************************************************************
+viernes 12 junio 2026  13:01:22 +0200 (0:00:01.225)       0:04:56.271 *********
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+
+TASK [geoserver-config : Verify initialization result] ***********************************************************************************************************************************************
+viernes 12 junio 2026  13:01:27 +0200 (0:00:05.016)       0:05:01.288 *********
+skipping: [aether-publish] => (item=s2ndvi)
+skipping: [aether-publish] => (item=s2rgb)
+skipping: [aether-publish] => (item=s2ndvi_mosaic)
+skipping: [aether-publish] => (item=s2rgb_mosaic)
+skipping: [aether-publish]
+
+TASK [geoserver-config : Check if coverages (layers) are already published] **************************************************************************************************************************
+viernes 12 junio 2026  13:01:28 +0200 (0:00:00.048)       0:05:01.337 *********
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+ok: [aether-publish] => (item=(censored due to no_log))
+
+TASK [geoserver-config : Publish coverages as Layers in GeoServer] ***********************************************************************************************************************************
+viernes 12 junio 2026  13:01:29 +0200 (0:00:01.528)       0:05:02.865 *********
+skipping: [aether-publish] => (item=s2ndvi)
+skipping: [aether-publish] => (item=s2rgb)
+skipping: [aether-publish] => (item=s2ndvi_mosaic)
+skipping: [aether-publish] => (item=s2rgb_mosaic)
+skipping: [aether-publish]
+
+TASK [geoserver-config : Check if the sld_ndvi style exists in the workspace] ************************************************************************************************************************
+viernes 12 junio 2026  13:01:29 +0200 (0:00:00.045)       0:05:02.911 *********
+ok: [aether-publish]
+
+TASK [geoserver-config : Upload sld_ndvi style to GeoServer] *****************************************************************************************************************************************
+viernes 12 junio 2026  13:01:30 +0200 (0:00:00.446)       0:05:03.357 *********
+ok: [aether-publish]
+
+TASK [geoserver-config : Check if the sld_rgb1184 style exists in the workspace] *********************************************************************************************************************
+viernes 12 junio 2026  13:01:30 +0200 (0:00:00.560)       0:05:03.917 *********
+ok: [aether-publish]
+
+TASK [geoserver-config : Upload style sld_rgb1184 to GeoServer] **************************************************************************************************************************************
+viernes 12 junio 2026  13:01:30 +0200 (0:00:00.391)       0:05:04.309 *********
+ok: [aether-publish]
+
+TASK [geoserver-config : Associating the sld_ndvi style with the NDVI layers (Simple and Mosaic)] ****************************************************************************************************
+viernes 12 junio 2026  13:01:31 +0200 (0:00:00.404)       0:05:04.714 *********
+ok: [aether-publish] => (item=s2ndvi)
+ok: [aether-publish] => (item=s2ndvi_mosaic)
+
+TASK [geoserver-config : Associate style sld_rgb1184 with RGB layers (Simple and Mosaic)] ************************************************************************************************************
+viernes 12 junio 2026  13:01:32 +0200 (0:00:01.446)       0:05:06.161 *********
+ok: [aether-publish] => (item=s2rgb)
+ok: [aether-publish] => (item=s2rgb_mosaic)
+
+RUNNING HANDLER [geoserver : Restart Tomcat] *********************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:33 +0200 (0:00:00.798)       0:05:06.959 *********
+changed: [aether-publish]
+
+RUNNING HANDLER [geoserver : Wait for GeoServer] *****************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:36 +0200 (0:00:02.803)       0:05:09.762 *********
+FAILED - RETRYING: [aether-publish]: Wait for GeoServer (12 retries left).
+ok: [aether-publish]
+
+PLAY [Deploy publishing script (Node 2)] *************************************************************************************************************************************************************
+
+TASK [aether-publish : Create temporary directory] ***************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:50 +0200 (0:00:14.376)       0:05:24.139 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Create publish base directory] ************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:51 +0200 (0:00:00.238)       0:05:24.377 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Ensure that git is installed] *************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:51 +0200 (0:00:00.264)       0:05:24.642 *********
+ok: [aether-publish]
+
+TASK [aether-publish : Clone the official aether repository] *****************************************************************************************************************************************
+viernes 12 junio 2026  13:01:51 +0200 (0:00:00.647)       0:05:25.289 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Synchronize the aether-publish folder to the base directory] ******************************************************************************************************************
+viernes 12 junio 2026  13:01:54 +0200 (0:00:02.573)       0:05:27.863 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Ensure correct ownership in the publish directory] ****************************************************************************************************************************
+viernes 12 junio 2026  13:01:54 +0200 (0:00:00.339)       0:05:28.202 *********
+ok: [aether-publish]
+
+TASK [aether-publish : Make run_publish.sh executable] ***********************************************************************************************************************************************
+viernes 12 junio 2026  13:01:55 +0200 (0:00:00.256)       0:05:28.459 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Generate .env file for Node 2] ************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:55 +0200 (0:00:00.255)       0:05:28.715 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Install unit aether-publish.service] ******************************************************************************************************************************************
+viernes 12 junio 2026  13:01:55 +0200 (0:00:00.523)       0:05:29.238 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Install unit aether-publish.timer] ********************************************************************************************************************************************
+viernes 12 junio 2026  13:01:56 +0200 (0:00:00.567)       0:05:29.806 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Enable publishing timer] ******************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:57 +0200 (0:00:00.531)       0:05:30.337 *********
+changed: [aether-publish]
+
+TASK [aether-publish : Clean up temporary directory] *************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:57 +0200 (0:00:00.942)       0:05:31.280 *********
+changed: [aether-publish]
+
+RUNNING HANDLER [aether-publish : Reload systemd] ****************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:58 +0200 (0:00:00.716)       0:05:31.996 *********
+ok: [aether-publish]
+
+PLAY RECAP *******************************************************************************************************************************************************************************************
+aether-process             : ok=59   changed=44   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+aether-publish             : ok=115  changed=82   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+
+
+TASKS RECAP ******************************************************************************************************************************************************************************************
+viernes 12 junio 2026  13:01:59 +0200 (0:00:01.221)       0:05:33.218 *********
+===============================================================================
+conda : Synchronize conda environment (Create or Update) ------------------------------------------------------------------------------------------------------------------------------------- 42.75s
+postgres : Install PostgreSQL 18 and PostGIS ------------------------------------------------------------------------------------------------------------------------------------------------- 35.24s
+tomcat : Install OpenJDK 17 ------------------------------------------------------------------------------------------------------------------------------------------------------------------ 31.81s
+system-update : Install the latest version of the necessary packages ------------------------------------------------------------------------------------------------------------------------- 23.66s
+Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 19.19s
+tomcat : Download Tomcat 9.0.118 ------------------------------------------------------------------------------------------------------------------------------------------------------------- 16.40s
+geoserver : Wait for GeoServer --------------------------------------------------------------------------------------------------------------------------------------------------------------- 14.38s
+geoserver-config : Wait for GeoServer to start up -------------------------------------------------------------------------------------------------------------------------------------------- 12.53s
+conda : Install Miniconda -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 12.16s
+postgres : Add PGDG repository with signed-by ------------------------------------------------------------------------------------------------------------------------------------------------- 9.79s
+geoserver : Download GeoServer WAR 2.28.4 ----------------------------------------------------------------------------------------------------------------------------------------------------- 7.31s
+geoserver-config : Initialize coverage stores in GeoServer (only those that do not exist) ----------------------------------------------------------------------------------------------------- 5.02s
+postgres : Install PostgreSQL pre-dependencies ------------------------------------------------------------------------------------------------------------------------------------------------ 4.46s
+system-update : Refresh cache if last was more than 3600 seconds ago -------------------------------------------------------------------------------------------------------------------------- 4.33s
+conda : Download Miniconda installer ---------------------------------------------------------------------------------------------------------------------------------------------------------- 3.04s
+tomcat : Restart Tomcat ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- 2.88s
+aether-api : Clone the official aether repository --------------------------------------------------------------------------------------------------------------------------------------------- 2.85s
+geoserver : Restart Tomcat -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 2.80s
+geoserver : Download extension gdal ----------------------------------------------------------------------------------------------------------------------------------------------------------- 2.63s
+aether-publish : Clone the official aether repository ----------------------------------------------------------------------------------------------------------------------------------------- 2.57s
+
+PLAYBOOK RECAP ***************************************************************************************************************************************************************************************
+Playbook run took 0 days, 0 hours, 5 minutes, 33 seconds
