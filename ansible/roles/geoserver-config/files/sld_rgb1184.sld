@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StyledLayerDescriptor version="1.0.0"
-    xsi:schemaLocation="http://opengis.net StyledLayerDescriptor.xsd"
-    xmlns="http://opengis.net"
-    xmlns:ogc="http://opengis.net"
-    xmlns:xlink="http://w3.org"
-    xmlns:xsi="http://w3.org">
+    xmlns="http://www.opengis.net/sld"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd">
   <NamedLayer>
     <Name>rgb_11_8_4_agriculture</Name>
     <UserStyle>
       <Title>Falso Color Agricultura (11-8-4)</Title>
-      <Abstract>Asignacion de Canales: SWIR (B11) al Rojo, NIR (B8) al Verde, Red (B4) al Azul</Abstract>
+      <Abstract>SWIR→Rojo, NIR→Verde, Red→Azul</Abstract>
       <FeatureTypeStyle>
+        <Name>vegetation_enhancement</Name>
         <Rule>
           <RasterSymbolizer>
             <Opacity>1.0</Opacity>
             <ChannelSelection>
               <RedChannel>
-                <SourceChannelName>1</SourceChannelName> <!-- Banda 11 (SWIR) -->
+                <SourceChannelName>1</SourceChannelName>
               </RedChannel>
               <GreenChannel>
-                <SourceChannelName>2</SourceChannelName> <!-- Banda 8 (NIR) -->
+                <SourceChannelName>2</SourceChannelName>
               </GreenChannel>
               <BlueChannel>
-                <SourceChannelName>3</SourceChannelName> <!-- Banda 4 (Red) -->
+                <SourceChannelName>3</SourceChannelName>
               </BlueChannel>
             </ChannelSelection>
-            <!-- Contraste optimizado para resaltar los cultivos en pantalla -->
             <ContrastEnhancement>
               <Normalize/>
             </ContrastEnhancement>

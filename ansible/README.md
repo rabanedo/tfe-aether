@@ -288,6 +288,6 @@ ansible-vault decrypt global_vars/applications_encrypted.yml
 | Python (sistema) | 3.12      |
 | python3-requests | sistema   |
 | OpenJDK | 17        |
-| Apache Tomcat | 9.0.104   |
+| Apache Tomcat | 9.0.118    |
 | GeoServer | 2.28.4    |
 | PostgreSQL + PostGIS | 18        |
