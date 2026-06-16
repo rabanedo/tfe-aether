@@ -23,6 +23,7 @@
     owner: "{{ sys_user }}"
     group: "{{ sys_group }}"
     mode:  "0755"
+  when: "'process' in group_names"
 
 - name: Configure logrotate for aether logs
   ansible.builtin.template:
@@ -31,3 +32,4 @@
     owner: root
     group: root
     mode:  "0644"
+  when: "'process' in group_names"
