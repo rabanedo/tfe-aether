@@ -107,28 +107,6 @@
   register: gs_layer_check
   no_log: true
 
-- name: Seed NDVI directories with dummy image
-  ansible.builtin.copy:
-    src: "dummy_ndvi.tif"
-    dest: "{{ geoserver_products_path }}/{{ item }}/20260601_133943_S2B_MSIL2A_T29TQG_R137_DUMMY_NDVIb.tif"
-    owner: "{{ sys_user }}"
-    group: "{{ sys_group }}"
-    mode: "0664"
-  loop:
-    - s2ndvi
-    - s2ndvi_mosaic
-
-- name: Seed RGB directories with dummy image
-  ansible.builtin.copy:
-    src: "dummy_rgb.tif"
-    dest: "{{ geoserver_products_path }}/{{ item }}/20260601_133943_S2B_MSIL2A_T29TQG_R137_DUMMY_RGB1184.tif"
-    owner: "{{ sys_user }}"
-    group: "{{ sys_group }}"
-    mode: "0664"
-  loop:
-    - s2rgb
-    - s2rgb_mosaic
-
 - name: Publish coverages as Layers in GeoServer
   ansible.builtin.uri:
     url: "http://localhost:8080/geoserver/rest/workspaces/{{ geoserver_workspace }}/coveragestores/{{ item.item }}/coverages"
