@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Rubén Rabanedo Aldonza
-  description: NFS Setup
+  description: Install and configure NFS server and client
   company: UNIR - TFE GII
 
   # If the issue tracker for your role is not on github, uncomment the

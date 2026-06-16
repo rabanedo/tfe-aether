@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Rubén Rabanedo Aldonza
-  description: Install and configure the tomcat application server
+  description: Install tomcat application server
   company: UNIR - TFE GII
 
   # If the issue tracker for your role is not on github, uncomment the
