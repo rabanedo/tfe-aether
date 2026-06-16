@@ -3,19 +3,21 @@
 # Default variables for Tomcat Configuration role
 # ==============================================================================
 
-# --- System Integration ------------------------------------------------------
+# ------------------------------------------------------------------------------
+# System Integration
+# ------------------------------------------------------------------------------
 # (These variables are usually inherited from the system-config role or the
 # tomcat base role)
-# ------------------------------------------------------------------------------
 
 sys_user: "aether_user"
 sys_group: "aether_group"
 catalina_home: "/opt/tomcat"
 
-# --- Tomcat Manager / Admin Credentials ---------------------------------------
+# ------------------------------------------------------------------------------
+# Tomcat Manager / Admin Credentials
+# ------------------------------------------------------------------------------
 # ATTENTION: It is highly recommended to override these variables in your
 # application's applications_encrypted.yml file using Ansible Vault for
 # production environments.
-# ------------------------------------------------------------------------------
 tomcat_admin: "admin"
 tomcat_admin_password: "admin_default_password_change_me"

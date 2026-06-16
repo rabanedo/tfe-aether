@@ -1,40 +1,52 @@
 ---
 # ============================================================================
-# Default variables for the Tomcat / GeoServer role
+# Default variables for the Tomcat role
 # ============================================================================
 
-# --- System and Permissions ---
+# ------------------------------------------------------------------------------
+# System and Permissions
+# ------------------------------------------------------------------------------
 sys_user: aether
 sys_group: aether
 temp_path: /tmp
 
-# --- Java OpenJDK ---
+# ------------------------------------------------------------------------------
+# Java OpenJDK
+# ------------------------------------------------------------------------------
 java_version: 17
 java_home: "/usr/lib/jvm/java-{{ java_version }}-openjdk-amd64"
 
-# --- Tomcat (Download and Routes) ---
+# ------------------------------------------------------------------------------
+# Tomcat (Download and Routes)
+# ------------------------------------------------------------------------------
 tomcat_version: 9.0.118
 tomcat_name: "apache-tomcat-{{ tomcat_version }}"
 tomcat_service: tomcat9
 tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-9/"
 t9_logs: /opt/tomcat9/logs
 
+# ------------------------------------------------------------------------------
 # Catalina configuration
+# ------------------------------------------------------------------------------
 catalina_home: /opt/tomcat9
 catalina_base: "{{ catalina_home }}"
 catalina_pid: "{{ catalina_base }}/temp/tomcat.pid"
 
-# --- JVM configuration for GeoServer (setenv.sh) ---
+# VM configuration for GeoServer (setenv.sh)
 # Initial (Xms) and maximum (Xmx) memory for the Java Virtual Machine.
 # Adjust according to the RAM available on the 'aether-publish' node.
 xms: 1G
 xmx: 4G
 
-# --- GeoServer ---
+# ------------------------------------------------------------------------------
+# GeoServer
+# ------------------------------------------------------------------------------
 geoserver_version: 2.28.4
 geoserver_data_dir: /opt/geoserver_data
 
-# --- Systemd Bind Mounts ---
+# ------------------------------------------------------------------------------
+# Systemd Bind Mounts
+# ------------------------------------------------------------------------------
 # List of dictionaries with {src: '/path/host', dst: '/path/container'}.
 # Useful for injecting volumes into the Tomcat service using BindPaths.
 bind_mounts: []

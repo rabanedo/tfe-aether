@@ -3,15 +3,21 @@
 # Default variables for the NFS Setup role
 # =============================================================================
 
-# --- Paths ---
+# ------------------------------------------------------------------------------
+# Paths
+# ------------------------------------------------------------------------------
 nfs_export_path: /dwh
 nfs_mount_path: /warehouse
 
-# --- Network identifiers ---
-# --- adjust according to your real IPs ---
+# ------------------------------------------------------------------------------
+# Network identifiers
+# ------------------------------------------------------------------------------
+# Adjust according to your real IPs
 nfs_server_ip: "{{ hostvars['aether-publish']['ansible_host'] }}"
 nfs_allowed_clients: "{{ hostvars['aether-process']['ansible_host'] }}"
 
-# --- Folders owner ---
+# ------------------------------------------------------------------------------
+# Folders owner
+# ------------------------------------------------------------------------------
 sys_user: aether
 sys_group: aether

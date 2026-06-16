@@ -1,23 +1,31 @@
 ---
 # =============================================================================
-# Default vars for the PostgreSQL role
+# Default variables for PostgreSQL role
 # =============================================================================
 
-# --- Execution control ---
+# ------------------------------------------------------------------------------
+# Execution control
+# ------------------------------------------------------------------------------
 # Determine if the tasks of this role should be performed.
 install_postgres: true
 
-# --- Database Configuration ---
+# ------------------------------------------------------------------------------
+# Database Configuration
+# ------------------------------------------------------------------------------
 db_name: aether
 
-# --- Credentials (Development Values) ---
+# ------------------------------------------------------------------------------
+# Credentials (Development Values)
+# ------------------------------------------------------------------------------
 catalog_username: aether_user
 
 # Default password (IMPORTANT: This is only a safety net for local environments.
 # In production, this MUST be overridden by your applications_encrypted.yml file).
 catalog_password: "password"
 
-# --- Advanced Options ---
+# ------------------------------------------------------------------------------
+# Advanced Options
+# ------------------------------------------------------------------------------
 # PostgreSQL Data Directory (optional, in case your role uses it for other tasks).
 postgres_db_path: /var/lib/postgresql/18/main
 

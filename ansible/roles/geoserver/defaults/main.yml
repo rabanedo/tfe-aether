@@ -3,22 +3,30 @@
 # Default variables for the GeoServer role
 # =============================================================================
 
-# --- System and Permissions ---
+# ------------------------------------------------------------------------------
+# System and Permissions
+# ------------------------------------------------------------------------------
 sys_user: aether
 sys_group: aether
 temp_path: /tmp
 
-# --- Tomcat Base ---
+# ------------------------------------------------------------------------------
+# Tomcat Base
+# ------------------------------------------------------------------------------
 catalina_home: /opt/tomcat9
 tomcat_service: tomcat9
 
-# --- GeoServer Core ---
+# ------------------------------------------------------------------------------
+# GeoServer Core
+# ------------------------------------------------------------------------------
 geoserver_version: 2.28.4
 # Important: Make sure this path is not inside /opt/tomcat9/webapps
 # so that it is not deleted if you update Tomcat.
 geoserver_data_dir: /opt/geoserver_data
 
-# --- GeoServer Extensions ---
+# ------------------------------------------------------------------------------
+# GeoServer Extensions
+# ------------------------------------------------------------------------------
 # List of official extensions to download. For example: ['vectortiles', 'ysld']
 # Leave this blank by default if it's not required.
 geoserver_extensions: []

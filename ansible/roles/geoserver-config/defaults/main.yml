@@ -1,19 +1,25 @@
 ---
 # =============================================================================
-# Default variables of the GeoServer Config (ImageMosaic) role
+# Default variables for the GeoServer Configuration role
 # =============================================================================
 
-# --- System and Permissions ---
+# ------------------------------------------------------------------------------
+# System and Permissions
+# ------------------------------------------------------------------------------
 sys_user: aether
 sys_group: aether
 
-# --- GeoServer REST API Authentication ---
+# ------------------------------------------------------------------------------
+# GeoServer REST API Authentication
+# ------------------------------------------------------------------------------
 # Default values for a newly installed GeoServer.
 # Overwrite the production Vault if the admin password is changed!
 geoserver_username: admin
 geoserver_password: geoserver
 
-# --- Workspace and Storage Configuration ---
+# ------------------------------------------------------------------------------
+# Workspace and Storage Configuration
+# ------------------------------------------------------------------------------
 geoserver_workspace: aether
 
 # Route where the images reside (the destination of Tomcat's Bind Mounts)
@@ -25,7 +31,9 @@ geoserver_stores:
   - RGB1184
   - NDVIb
 
-# --- Database Connection (PostGIS Catalog) ---
+# ------------------------------------------------------------------------------
+# Database Connection (PostGIS Catalog)
+# ------------------------------------------------------------------------------
 # Used in datastore.properties.j2 to link the ImageMosaic with PostgreSQL
 catalog_host: localhost
 catalog_port: 5432

@@ -3,18 +3,26 @@
 # Default variables for the Aether API role
 # =============================================================================
 
-# --- System and Permissions ---
+# ------------------------------------------------------------------------------
+# System and Permissions
+# ------------------------------------------------------------------------------
 sys_user: aether
 sys_group: aether
 
-# --- Application Repository ---
+# ------------------------------------------------------------------------------
+# Application Repository
+# ------------------------------------------------------------------------------
 api_repo_url: "https://github.com/rabanedo/tfe-aether.git"
 api_repo_version: "main"
 
-# --- Path cdse-api ---
+# ------------------------------------------------------------------------------
+# Path cdse-api
+# ------------------------------------------------------------------------------
 api_base_dir: /opt/cdse-api
 
-# --- Directory Structure (Data Warehouse) ---
+# ------------------------------------------------------------------------------
+# Directory Structure (Data Warehouse)
+# ------------------------------------------------------------------------------
 # List of folders required by the application to process products.
 # Extracted to a variable to allow deployments to different disks or paths.
 api_dwh_directories:

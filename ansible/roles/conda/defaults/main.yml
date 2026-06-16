@@ -1,17 +1,23 @@
 ---
 # ============================================================================
-# Default variables for the Miniconda / Aether API role
+# Default variables for the Miniconda role
 # ============================================================================
 
-# --- System Paths ---
+# ------------------------------------------------------------------------------
+# System Paths
+# ------------------------------------------------------------------------------
 api_conda_base: /opt/miniconda3
 
 temp_path: /tmp
 
-# --- Download Miniconda ---
+# ------------------------------------------------------------------------------
+# Download Miniconda
+# ------------------------------------------------------------------------------
 conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
-# --- Virtual Environment Configuration ---
+# ------------------------------------------------------------------------------
+# Virtual Environment Configuration
+# ------------------------------------------------------------------------------
 api_conda_env: cdse-api
 
 conda_packages:
