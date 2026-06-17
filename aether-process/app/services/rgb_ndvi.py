@@ -5,8 +5,6 @@
 rgb_ndvi.py — Procesador de productos derivados Sentinel-2 (RGB y NDVI)
 
 Correcciones aplicadas:
-  - [FIX #2]  _to_cog: srs ya no está hardcodeado a EPSG:25830; se lee el SRS nativo
-              del raster temporal y se pasa explícitamente. Función _get_native_srs añadida.
   - [FIX #3]  gdalwarp de remuestreo 20→10 m: añadido -r bilinear y -overwrite en todos
               los compute_rgb* que usan bandas de 20 m (B11, B12).
   - [FIX #6]  _get_catalog_manager: si ingest_id está presente y el catálogo falla,
@@ -270,9 +268,7 @@ def compute_rgb432(
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b4_tif} {b3_tif} {b2_tif}")
 
-    # [FIX #2] Leer SRS nativo del temporal y pasarlo a _to_cog
-    native_srs = _get_native_srs(tmp)
-    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs=native_srs)
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs="EPSG:25830")
 
     # [FIX #7] Borrar todos los VRTs generados por _gdal_translate_sds
     _cleanup_vrt_files(out_path)
@@ -326,8 +322,7 @@ def compute_rgb1184(
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b11_tif} {b8_tif} {b4_tif}")
 
-    native_srs = _get_native_srs(tmp)
-    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs=native_srs)
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs="EPSG:25830")
 
     _cleanup_vrt_files(out_path)
     _remove_files(b4_vrt, b8_vrt, b11_20_vrt, b11_vrt, b4_tif, b8_tif, b11_tif, tmp)
@@ -379,8 +374,7 @@ def compute_rgb1283(
 
     _run_cmd(f"gdal_merge.py -separate -ot Byte -o {tmp} {b12_tif} {b8_tif} {b3_tif}")
 
-    native_srs = _get_native_srs(tmp)
-    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs=native_srs)
+    _to_cog(tmp, out_path, compress="JPEG", nodata="0", srs="EPSG:25830")
 
     _cleanup_vrt_files(out_path)
     _remove_files(b3_vrt, b8_vrt, b12_20_vrt, b12_vrt, b3_tif, b8_tif, b12_tif, tmp)
@@ -413,8 +407,7 @@ def compute_ndvi(xml_path: str, out_path: str) -> None:
         f"--calc=\'{calc}\' --type=Float32 --NoDataValue=9999 --overwrite"
     )
 
-    native_srs = _get_native_srs(tmp)
-    _to_cog(tmp, out_path, compress="DEFLATE", predictor=3, nodata="9999", srs=native_srs)
+    _to_cog(tmp, out_path, compress="DEFLATE", predictor=3, nodata="9999", srs="EPSG:25830")
 
     _cleanup_vrt_files(out_path)
     _remove_files(b4_vrt, b8_vrt, tmp)
@@ -459,8 +452,7 @@ def compute_ndvi_byte(xml_path: str, out_path: str) -> None:
         f"--calc=\'{calc}\' --type=Byte --NoDataValue=255 --overwrite"
     )
 
-    native_srs = _get_native_srs(tmp)
-    _to_cog(tmp, out_path, compress="LZW", predictor=2, nodata="255", srs=native_srs)
+    _to_cog(tmp, out_path, compress="LZW", predictor=2, nodata="255", srs="EPSG:25830")
 
     _cleanup_vrt_files(out_path)
     _remove_files(b4_vrt, b8_vrt, tmp)
