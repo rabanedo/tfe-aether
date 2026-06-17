@@ -1,7 +1,7 @@
 ---
 - name: "Download extension {{ extension }}"
   ansible.builtin.get_url:
-    url: "https://sourceforge.net/projects/geoserver/files/GeoServer/{{ geoserver_version }}/extensions/geoserver-{{ geoserver_version }}-{{ extension }}-plugin.zip"
+    url: "{{ geoserver_download_url }}/{{ geoserver_version }}/extensions/geoserver-{{ geoserver_version }}-{{ extension }}-plugin.zip"
     dest: "{{ temp_path }}/gs-ext-{{ extension }}.zip"
     mode: "0644"
     timeout: 30

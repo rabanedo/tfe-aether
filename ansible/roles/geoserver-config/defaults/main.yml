@@ -31,6 +31,8 @@ geoserver_stores:
   - RGB1184
   - NDVIb
 
+geoserver_local_url: "http://localhost:8080/geoserver/rest/workspaces"
+
 # ------------------------------------------------------------------------------
 # Database Connection (PostGIS Catalog)
 # ------------------------------------------------------------------------------

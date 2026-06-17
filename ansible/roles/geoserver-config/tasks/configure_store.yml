@@ -21,6 +21,7 @@
       TimeAttribute=ingestion
       Schema=*the_geom:Polygon,location:String,ingestion:java.util.Date
       PropertyCollectors=TimestampFileNameExtractorSPI[timeregex](ingestion)
+      MosaicCRS=EPSG:25830
 
 - name: "Create timeregex.properties for {{ store }}"
   ansible.builtin.copy:

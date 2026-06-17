@@ -19,6 +19,7 @@ tomcat_service: tomcat9
 # ------------------------------------------------------------------------------
 # GeoServer Core
 # ------------------------------------------------------------------------------
+geoserver_download_url: "https://sourceforge.net/projects/geoserver/files/GeoServer"
 geoserver_version: 2.28.4
 # Important: Make sure this path is not inside /opt/tomcat9/webapps
 # so that it is not deleted if you update Tomcat.

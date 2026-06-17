@@ -50,6 +50,9 @@ conda_terms:
 # --- Node 2: GeoServer (aether-publish) ----------------------------------
 geoserver_version: 2.28.4
 geoserver_data_dir: /opt/geoserver_data
+geoserver_download_url: "https://sourceforge.net/projects/geoserver/files/GeoServer"
+geoserver_local_url: "http://localhost:8080/geoserver/rest/workspaces"
+
 publish_base_dir: /opt/aether-publish
 publish_products_dir: /dwh/data
 
@@ -57,7 +60,7 @@ tomcat_version: 9.0.118
 tomcat_name: "apache-tomcat-{{ tomcat_version }}"
 tomcat_home: /opt/tomcat9
 tomcat_service: tomcat9
-tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-9/"
+tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-9"
 java_version: 17
 java_home: /usr/lib/jvm/java-17-openjdk-amd64
 

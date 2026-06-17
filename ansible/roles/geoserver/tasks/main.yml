@@ -14,7 +14,7 @@
 
 - name: Download GeoServer WAR {{ geoserver_version }}
   ansible.builtin.get_url:
-    url: "https://sourceforge.net/projects/geoserver/files/GeoServer/{{ geoserver_version }}/geoserver-{{ geoserver_version }}-war.zip"
+    url: "{{ geoserver_download_url }}/{{ geoserver_version }}/geoserver-{{ geoserver_version }}-war.zip"
     dest: "{{ temp_path }}/geoserver-{{ geoserver_version }}-war.zip"
     mode: "0644"
   when: not gs_deployed.stat.exists
