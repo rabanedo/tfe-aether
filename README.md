@@ -1,6 +1,6 @@
 # Aether — Plataforma de Monitorización de Cultivos con Sentinel-2
 
-> Trabajo de Fin de Estudios — Implementación de una plataforma distribuida para la monitorización automatizada de cultivos mediante Sentinel-2.
+> Trabajo de Fin de Estudios en el Grado en Ingeniería Informática de UNIR — Implementación de una plataforma distribuida para la monitorización automatizada de cultivos mediante Sentinel-2.
 
 ---
 
